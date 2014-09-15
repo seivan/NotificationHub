@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>DDAF91CE-6E2E-4223-99D8-3E9C1FDEC464</string>
+	<key>IDESourceControlProjectName</key>
+	<string>TestsAndSample</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>385E476955E4CA7E59E842478FBE8A019B31218E</key>
+		<string>github.com:seivan/VectorArithmetic.git</string>
+		<key>A6A21D7E-207A-4B0F-9E1D-5E7C1AE26371</key>
+		<string>ssh://github.com/seivan/VectorArithmetic.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>TestsAndSample/TestsAndSample.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>385E476955E4CA7E59E842478FBE8A019B31218E</key>
+		<string>../../..</string>
+		<key>A6A21D7E-207A-4B0F-9E1D-5E7C1AE26371</key>
+		<string>../../../../VectorArithmetic</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>github.com:seivan/VectorArithmetic.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>385E476955E4CA7E59E842478FBE8A019B31218E</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>385E476955E4CA7E59E842478FBE8A019B31218E</string>
+			<key>IDESourceControlWCCName</key>
+			<string>SpriteKitComposition</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>A6A21D7E-207A-4B0F-9E1D-5E7C1AE26371</string>
+			<key>IDESourceControlWCCName</key>
+			<string>VectorArithmetic</string>
+		</dict>
+	</array>
+</dict>
+</plist>
