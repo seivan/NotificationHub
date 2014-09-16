@@ -13,8 +13,21 @@ import SpriteKit
 
 class MyScene : SKScene {
   override func update(currentTime: NSTimeInterval) {
-//    super.update(currentTime)
+    super.update(currentTime)
+
   }
+  override func didEvaluateActions() {
+//    super.didEvaluateActions()
+  }
+  override func didSimulatePhysics() {
+//    super.didSimulatePhysics()
+  }
+
+  override func didFinishUpdate() {
+//    super.didSimulatePhysics()
+  }
+
+ 
 }
 
 
@@ -23,6 +36,10 @@ class Movement : Component {
   weak var node:SKNode?
   func didAddToNode() {
     println("didAddToNode Movement \(self.node?.name)")
+    self.node?.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 40, height: 40))
+    //    player.physicsBody?.collisionBitMask = 1
+    self.node?.physicsBody?.contactTestBitMask = 2
+
   }
   func didRemoveFromNode() {
     println("didRemoveFromNode Movement \(self.node?.name)")
@@ -30,14 +47,14 @@ class Movement : Component {
   
   func didAddNodeToScene() {
     println("didAddNodeToScene Movement \(self.node?.name) and scene \(self.node?.scene?.name)")
-    
   }
   
   func didRemoveNodeFromScene() {
     println("didRemoveNodeFromScene Movement \(self.node?.name)")
   }
   func didUpdate(time:NSTimeInterval) {
-    println("didUpdate \(time) Movement \(self.node?.name)")
+//    println("didUpdate \(time) Movement \(self.node?.name)")
+    if(self.node?.name == "ENEMY") { self.node?.physicsBody?.applyImpulse(CGVector(5.0,5.0)) }
   }
   func didChangeSceneSizedFrom(previousSize:CGSize) {
     println("didChangeSceneSizedFrom \(previousSize) Movement \(self.node?.name)")
@@ -54,6 +71,11 @@ class Movement : Component {
   func didEndContact(contact:SKPhysicsContact) {
     println("didEndContact \(contact) Movement \(self.node?.name)")
   }
+  func didFinishUpdate() {
+    println("didFinishUpdate MOVEMENT \(self.node?.name)")
+    
+  }
+
   
 }
 
@@ -76,7 +98,7 @@ class Life :  Component {
     println("didRemoveNodeFromScene LIVING \(self.node?.name)")
   }
   func didUpdate(time:NSTimeInterval) {
-    println("didUpdate \(time) LIVING  \(self.node?.name)")
+//    println("didUpdate \(time) LIVING  \(self.node?.name)")
   }
   func didChangeSceneSizedFrom(previousSize:CGSize) {
     println("didChangeSceneSizedFrom \(previousSize) LIVING \(self.node?.name)")
@@ -92,6 +114,10 @@ class Life :  Component {
   }
   func didEndContact(contact:SKPhysicsContact) {
     println("didEndContact \(contact) LIVING \(self.node?.name)")
+  }
+  func didFinishUpdate() {
+    println("didFinishUpdate LIVING \(self.node?.name)")
+
   }
 
   
@@ -135,25 +161,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     
+
+    let enemy = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: 40, height: 40))
+    enemy.position = CGPoint(x: 100, y: 100)
+    enemy.name = "ENEMY"
+    
+    
+    let player = SKSpriteNode(color: UIColor.blueColor(), size: CGSize(width: 40, height: 40))
+    player.position = CGPoint(x: 200, y: 200)
+    player.name = "PLAYER"
+
+
+    
+    scene.physicsWorld.gravity = CGVector(0,0)
+    
     let gun = SKNode()
     gun.name = "GUN"
-    let player = SKNode()
-    player.name = "PLAYER"
-    
-    let life = Life()
-    let movement = Movement()
-
-    player.addComponent(life, withKey:"Living")
-    gun.addComponent(Life())
     player.addChild(gun)
-    
-    
-    scene.insertChild(player, atIndex: 0)
 
-    scene.removeChildrenInArray([player])
+    
+
+    player.addComponent(Movement(), withKey:"Movement")
+    gun.addComponent(Life())
+
+    enemy.addComponent(Movement())
+    
+    
+    scene.addChild(player)
+    scene.addChild(enemy)
+
+//    scene.removeChildrenInArray([player,gun])
 //    scene.insertChild(player, atIndex: 0)
-    let g = SKScene()
-    g.name = "GGGGGGGGGGG"
+//    let g = SKScene()
+//    g.name = "GGGGGGGGGGG"
 //    skView.presentScene(g)
 //     g.addChild(player)
 
