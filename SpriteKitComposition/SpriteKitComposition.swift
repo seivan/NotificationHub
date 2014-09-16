@@ -164,41 +164,44 @@ extension SKNode {
     
   }
 
-  private func tupleHandlerContact(contact: SKPhysicsContact) -> (allComponents: [Component], allNodes: [SKNode]) {
+  private func tupleForContact(contact: SKPhysicsContact) -> (allComponents: [Component], allNodes: [SKNode]) {
     let nodeA = contact.bodyA.node
-    let nodeB = contact.bodyA.node
+    let nodeB = contact.bodyB.node
     
     let componentsA = nodeA?.components ?? [Component]()
     let componentsB = nodeB?.components ?? [Component]()
     
     let allComponents = componentsA + componentsB
     let allNodes = (nodeA?.childNodes ?? [SKNode]()) + (nodeB?.childNodes ?? [SKNode]())
+    
     return (allComponents, allNodes)
 
   }
-  private func internalChildDidBeginContact(contact: SKPhysicsContact) {
+
+  private func internalRecursiveDidBeginContact(contact: SKPhysicsContact) {
     for component in self.components { if component.isEnabled { component.didBeginContact?(contact) } }
-    for child in self.childNodes     { child.internalChildDidBeginContact(contact)  }
+    for child in self.childNodes     { child.internalRecursiveDidBeginContact(contact)  }
   }
   
   
   private func internalDidBeginContact(contact: SKPhysicsContact) {
-    let allComponents = self.tupleHandlerContact(contact).allComponents
-    let allNodes      = self.tupleHandlerContact(contact).allNodes
-    
-    for component in self.components  { if component.isEnabled { component.didBeginContact?(contact) } }
-    for component in allComponents    { if component.isEnabled { component.didBeginContact?(contact) } }
-    for sprite    in allNodes         { sprite.internalChildDidBeginContact(contact) }
+    let tuple = self.tupleForContact(contact)
+    for component in self.components      { if component.isEnabled { component.didBeginContact?(contact) } }
+    for component in tuple.allComponents  { if component.isEnabled { component.didBeginContact?(contact) } }
+    for sprite    in tuple.allNodes       { sprite.internalRecursiveDidBeginContact(contact) }
     
   }
 
+  private func internalRecursiveDidEndContact(contact: SKPhysicsContact) {
+    for component in self.components { if component.isEnabled { component.didBeginContact?(contact) } }
+    for child in self.childNodes     { child.internalRecursiveDidEndContact(contact)  }
+  }
+
   private func internalDidEndContact(contact: SKPhysicsContact) {
-    let allComponents = self.tupleHandlerContact(contact).allComponents
-    let allNodes      = self.tupleHandlerContact(contact).allNodes
-    
-    for component in self.components  { if component.isEnabled { component.didEndContact?(contact) } }
-    for component in allComponents    { if component.isEnabled { component.didEndContact?(contact) } }
-    for sprite    in allNodes         { sprite.internalChildDidBeginContact(contact) }
+    let tuple = self.tupleForContact(contact)
+    for component in self.components      { if component.isEnabled { component.didEndContact?(contact) } }
+    for component in tuple.allComponents  { if component.isEnabled { component.didEndContact?(contact) } }
+    for sprite    in tuple.allNodes       { sprite.internalRecursiveDidEndContact(contact) }
     
   }
 

@@ -17,14 +17,16 @@ class MyScene : SKScene {
 
   }
   override func didEvaluateActions() {
-//    super.didEvaluateActions()
+    super.didEvaluateActions()
   }
   override func didSimulatePhysics() {
-//    super.didSimulatePhysics()
+    super.didSimulatePhysics()
   }
-
   override func didFinishUpdate() {
-//    super.didSimulatePhysics()
+    super.didSimulatePhysics()
+  }
+  override func didEndContact(contact: SKPhysicsContact) {
+    super.didEndContact(contact)
   }
 
  
@@ -92,10 +94,10 @@ class Movement : Component {
     println("didChangeSceneSizedFrom \(previousSize) Movement \(self.node?.name)")
   }
   func didEvaluateActions() {
-    println("didEvaluateActions Movement \(self.node?.name)")
+//    println("didEvaluateActions Movement \(self.node?.name)")
   }
   func didSimulatePhysics() {
-    println("didSimulatePhysics Movement \(self.node?.name)")
+//    println("didSimulatePhysics Movement \(self.node?.name)")
   }
   func didBeginContact(contact:SKPhysicsContact) {
 //    println("didBeginContact \(contact) Movement \(self.node?.name)")
@@ -107,9 +109,8 @@ class Movement : Component {
       self.node?.removeComponentWithClass(Movement.self)
       node.addComponent(Movement())
     }
-
-    
   }
+  
   func didFinishUpdate() {
     println("didFinishUpdate MOVEMENT \(self.node?.name)")
     
@@ -143,10 +144,10 @@ class Life :  Component {
     println("didChangeSceneSizedFrom \(previousSize) LIVING \(self.node?.name)")
   }
   func didEvaluateActions() {
-    println("didEvaluateActions LIVING \(self.node?.name)")
+//    println("didEvaluateActions LIVING \(self.node?.name)")
   }
   func didSimulatePhysics() {
-    println("didSimulatePhysics LIVING \(self.node?.name)")
+//    println("didSimulatePhysics LIVING \(self.node?.name)")
   }
   func didBeginContact(contact:SKPhysicsContact) {
     println("didBeginContact \(contact) LIVING \(self.node?.name)")
@@ -216,14 +217,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     scene.physicsBody = SKPhysicsBody(edgeLoopFromRect: scene.frame)
 
     
-//    let gun = SKNode()
-//    gun.name = "GUN"
-//    player.addChild(gun)
+    let gun = SKNode()
+    gun.name = "GUN"
+    player.addChild(gun)
 
     
     enemy.addComponent(Movement())
     player.addComponent(Movement())
-//    gun.addComponent(Life())
+    gun.addComponent(Life())
 
     
     scene.addChild(enemy)
