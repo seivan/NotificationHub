@@ -38,7 +38,23 @@ class Movement : Component {
     println("didAddToNode Movement \(self.node?.name)")
     self.node?.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 40, height: 40))
     //    player.physicsBody?.collisionBitMask = 1
-    self.node?.physicsBody?.contactTestBitMask = 2
+    enum Contact : UInt32 {
+      case Enemy
+      case Player
+    }
+    if(self.node?.name == "ENEMY") {
+      self.node?.physicsBody?.categoryBitMask = Contact.Enemy.toRaw()
+      self.node?.physicsBody?.contactTestBitMask = Contact.Player.toRaw()
+      self.node?.physicsBody?.collisionBitMask = Contact.Player.toRaw()
+
+      
+    }
+    else {
+      self.node?.physicsBody?.categoryBitMask = Contact.Player.toRaw()
+      self.node?.physicsBody?.contactTestBitMask = Contact.Enemy.toRaw()
+      self.node?.physicsBody?.collisionBitMask = Contact.Enemy.toRaw()
+    }
+    self.node?.physicsBody?.dynamic = true
 
   }
   func didRemoveFromNode() {
@@ -47,6 +63,10 @@ class Movement : Component {
   
   func didAddNodeToScene() {
     println("didAddNodeToScene Movement \(self.node?.name) and scene \(self.node?.scene?.name)")
+    if(self.node?.name == "ENEMY") {
+      self.node?.physicsBody?.applyImpulse(CGVector(5.0,5.0))
+    }
+
   }
   
   func didRemoveNodeFromScene() {
@@ -54,7 +74,10 @@ class Movement : Component {
   }
   func didUpdate(time:NSTimeInterval) {
 //    println("didUpdate \(time) Movement \(self.node?.name)")
-    if(self.node?.name == "ENEMY") { self.node?.physicsBody?.applyImpulse(CGVector(5.0,5.0)) }
+    if(self.node?.name == "ENEMY") {
+//     self.node?.physicsBody?.applyImpulse(CGVector(5.0,5.0))
+   //   println(self.node?.physicsBody?)
+    }
   }
   func didChangeSceneSizedFrom(previousSize:CGSize) {
     println("didChangeSceneSizedFrom \(previousSize) Movement \(self.node?.name)")
@@ -70,6 +93,8 @@ class Movement : Component {
   }
   func didEndContact(contact:SKPhysicsContact) {
     println("didEndContact \(contact) Movement \(self.node?.name)")
+
+    
   }
   func didFinishUpdate() {
     println("didFinishUpdate MOVEMENT \(self.node?.name)")
@@ -174,21 +199,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     
     scene.physicsWorld.gravity = CGVector(0,0)
-    
-    let gun = SKNode()
-    gun.name = "GUN"
-    player.addChild(gun)
+    scene.physicsBody = SKPhysicsBody(edgeLoopFromRect: scene.frame)
 
     
+//    let gun = SKNode()
+//    gun.name = "GUN"
+//    player.addChild(gun)
 
-    player.addComponent(Movement(), withKey:"Movement")
-    gun.addComponent(Life())
-
+    
     enemy.addComponent(Movement())
+    player.addComponent(Movement())
+//    gun.addComponent(Life())
+
     
-    
-    scene.addChild(player)
     scene.addChild(enemy)
+    scene.addChild(player)
 
 //    scene.removeChildrenInArray([player,gun])
 //    scene.insertChild(player, atIndex: 0)

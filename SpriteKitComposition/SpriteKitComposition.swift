@@ -45,6 +45,7 @@ extension SKNode {
   func componentWithKey(key:String) -> Component? {
     return self.componentContainer.components[key]
   }
+  
   func addComponent<T:Component>(component:T, withKey key:String) -> Bool {
     if(self.componentContainer.components[key] == nil) {
       self.componentContainer.components[key] = component
@@ -63,7 +64,8 @@ extension SKNode {
   }
   
   func removeComponentWithClass(theClass:AnyClass) -> Bool {
-    return self.removeComponentWithKey(NSStringFromClass(theClass))
+    let key = NSStringFromClass(theClass)
+    return self.removeComponentWithKey(key)
   }
   
   func removeComponentWithKey(key:String) -> Bool {
@@ -91,13 +93,14 @@ extension SKNode {
 }
 
 private class SharedComponentManager {
-  let mapTable:NSMapTable = NSMapTable.weakToStrongObjectsMapTable()
+  let mapTable:NSMapTable = NSMapTable(keyOptions: NSPointerFunctionsOpaquePersonality, valueOptions: NSPointerFunctionsStrongMemory)
   class var sharedInstance : SharedComponentManager {
   struct Static {
     static var onceToken : dispatch_once_t = 0
     static var instance : SharedComponentManager? = nil
     }
     dispatch_once(&Static.onceToken) {
+      
       func swizzleExchangeMethodsOnClass(cls: AnyClass, replaceSelector fromSelector:String, withSelector toSelector:String) {
         var originalMethod: Method?
         var swizzledMethod: Method?
@@ -115,6 +118,7 @@ private class SharedComponentManager {
       swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeFromParent", withSelector:"internalRemoveFromParent")
       
       Static.instance = SharedComponentManager()
+
     }
     return Static.instance!
   }
@@ -145,17 +149,19 @@ private class SharedComponentManager {
   }
   
   public func didBeginContact(contact: SKPhysicsContact) {
-    let componentsA = contact.bodyA.node?.components // ?? [Component]()
-    let componentsB = contact.bodyB.node?.components// ?? [Component]()
-    let allComponents = componentsA! + componentsB!
+    let componentsA = contact.bodyA.node?.components ?? [Component]()
+    let componentsB = contact.bodyB.node?.components ?? [Component]()
+
+    let allComponents = componentsA + componentsB
+    println(allComponents)
     for component in allComponents { if(component.isEnabled == true) { component.didBeginContact?(contact) } }
 
   }
   
   public func didEndContact(contact: SKPhysicsContact) {
-    let componentsA = contact.bodyA.node?.components// ?? [Component]()
-    let componentsB = contact.bodyB.node?.components// ?? [Component]()
-    let allComponents = componentsA! + componentsB!
+    let componentsA = contact.bodyA.node?.components ?? [Component]()
+    let componentsB = contact.bodyB.node?.components ?? [Component]()
+    let allComponents = componentsA + componentsB
     for component in allComponents {
       if(component.isEnabled == true ) {
         component.didEndContact?(contact)
@@ -272,6 +278,7 @@ extension SKNode {
   
   private var componentContainer:InternalComponentContainer {
     get {
+//      println(SharedComponentManager.sharedInstance.mapTable.count)
       var manager = SharedComponentManager.sharedInstance.mapTable.objectForKey(self) as InternalComponentContainer?
       if(manager == nil) {
         manager = InternalComponentContainer()
