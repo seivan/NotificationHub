@@ -47,11 +47,12 @@ extension SKNode {
   }
   
   func addComponent<T:Component>(component:T, withKey key:String) -> Bool {
-    if(self.componentContainer.components[key] == nil) {
+    if self.componentContainer.components[key] == nil {
       self.componentContainer.components[key] = component
       component.node = self
       component.isEnabled = true
       component.didAddToNode?()
+      if self.scene != nil { component.didAddNodeToScene?() }
       return true
     }
     else { return false }
@@ -73,6 +74,7 @@ extension SKNode {
       componentToRemove.isEnabled = false
       componentToRemove.node = nil
       componentToRemove.didRemoveFromNode?()
+      
       return true
     }
     else { return false }
@@ -81,7 +83,7 @@ extension SKNode {
   func removeComponent<T:Component>(component:T) -> Bool {
     var foundKey:String?
     for (key, value) in self.componentContainer.components {
-      if(value === component) {
+      if value === component {
         foundKey = key
         break
       }
@@ -92,44 +94,14 @@ extension SKNode {
   
 }
 
-private class SharedComponentManager {
-  let mapTable:NSMapTable = NSMapTable(keyOptions: NSPointerFunctionsOpaquePersonality, valueOptions: NSPointerFunctionsStrongMemory)
-  class var sharedInstance : SharedComponentManager {
-  struct Static {
-    static var onceToken : dispatch_once_t = 0
-    static var instance : SharedComponentManager? = nil
-    }
-    dispatch_once(&Static.onceToken) {
-      
-      func swizzleExchangeMethodsOnClass(cls: AnyClass, replaceSelector fromSelector:String, withSelector toSelector:String) {
-        var originalMethod: Method?
-        var swizzledMethod: Method?
-        
-        originalMethod = class_getInstanceMethod(SKNode.classForCoder(), Selector.convertFromStringLiteral(fromSelector))
-        swizzledMethod = class_getInstanceMethod(SKNode.classForCoder(), Selector.convertFromStringLiteral(toSelector))
-        
-        if (originalMethod != nil && swizzledMethod != nil) { method_exchangeImplementations(originalMethod!, swizzledMethod!) }
-        
-      }
-      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "addChild:", withSelector:"internalAddChild:")
-      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "insertChild:atIndex:", withSelector:"internalInsertChild:atIndex:")
-      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeChildrenInArray:", withSelector:"internalRemoveChildrenInArray:")
-      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeAllChildren", withSelector:"internalRemoveAllChildren")
-      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeFromParent", withSelector:"internalRemoveFromParent")
-      
-      Static.instance = SharedComponentManager()
 
-    }
-    return Static.instance!
-  }
-}
 
  extension SKScene : SKPhysicsContactDelegate {
   public func update(currentTime: NSTimeInterval) {
     let container = self.componentContainer
     var timeSinceLast: CFTimeInterval = currentTime - container.lastUpdateTimeInterval
     container.lastUpdateTimeInterval = currentTime
-    if (timeSinceLast > 1) {
+    if  timeSinceLast > 1  {
       timeSinceLast = 1.0 / 60.0
       container.lastUpdateTimeInterval = currentTime
     }
@@ -151,10 +123,8 @@ private class SharedComponentManager {
   public func didBeginContact(contact: SKPhysicsContact) {
     let componentsA = contact.bodyA.node?.components ?? [Component]()
     let componentsB = contact.bodyB.node?.components ?? [Component]()
-
     let allComponents = componentsA + componentsB
-    println(allComponents)
-    for component in allComponents { if(component.isEnabled == true) { component.didBeginContact?(contact) } }
+    for component in allComponents { if component.isEnabled { component.didBeginContact?(contact) } }
 
   }
   
@@ -162,12 +132,7 @@ private class SharedComponentManager {
     let componentsA = contact.bodyA.node?.components ?? [Component]()
     let componentsB = contact.bodyB.node?.components ?? [Component]()
     let allComponents = componentsA + componentsB
-    for component in allComponents {
-      if(component.isEnabled == true ) {
-        component.didEndContact?(contact)
-      }
-    }
-    
+    for component in allComponents { if component.isEnabled { component.didEndContact?(contact) } }
   }
 
   
@@ -186,22 +151,22 @@ private class SharedComponentManager {
 extension SKNode {
   
   private func internalUpdate(currentTime: NSTimeInterval) {
-    for component in self.components { if(component.isEnabled) { component.didUpdate?(currentTime) } }
+    for component in self.components { if component.isEnabled { component.didUpdate?(currentTime) } }
     for child in self.childNodes     { child.internalUpdate(currentTime) }
   }
 
   private func internalDidEvaluateActions() {
-    for component in self.components { if(component.isEnabled) { component.didEvaluateActions?() } }
+    for component in self.components { if component.isEnabled { component.didEvaluateActions?() } }
     for child in self.childNodes     { child.internalDidEvaluateActions()  }
   }
   
   private func internalDidSimulatePhysics() {
-    for component in self.components { if(component.isEnabled) { component.didSimulatePhysics?() } }
+    for component in self.components { if component.isEnabled { component.didSimulatePhysics?() } }
     for child in self.childNodes     { child.internalDidSimulatePhysics()  }
   }
   
   private func internalDidFinishUpdate() {
-    for component in self.components { if(component.isEnabled) { component.didFinishUpdate?() } }
+    for component in self.components { if component.isEnabled  { component.didFinishUpdate?() } }
     for child in self.childNodes     { child.internalDidFinishUpdate()  }
     
   }
@@ -212,7 +177,7 @@ extension SKNode {
       for component in node.components { component.didAddNodeToScene?() }
       for childNode in node.childNodes { node.addedChild(childNode) }
     }
-    else if(self.parent != nil) {
+    else if self.parent != nil {
       for component in node.components { component.didAddNodeToScene?() }
       for childNode in node.childNodes { node.addedChild(childNode) }
     }
@@ -221,7 +186,7 @@ extension SKNode {
   
   
   func internalAddChild(node:SKNode!) {
-    if(node.parent != self) {
+    if node.parent != self {
       node.removeFromParent()
       self.internalAddChild(node)
       self.addedChild(node);
@@ -230,7 +195,7 @@ extension SKNode {
   }
   
   func internalInsertChild(node: SKNode!, atIndex index: Int) {
-    if(node.parent != self) {
+    if node.parent != self {
       node.removeFromParent()
       self.internalInsertChild(node, atIndex: index)
       self.addedChild(node);
@@ -243,7 +208,7 @@ extension SKNode {
       for component in node.components { component.didRemoveNodeFromScene?() }
       for childNode in node.childNodes { node.removedChild(childNode) }
     }
-    else if(self.parent != nil) {
+    else if self.parent != nil {
       for component in node.components { component.didRemoveNodeFromScene?() }
       for childNode in node.childNodes { node.removedChild(childNode) }
     }
@@ -255,7 +220,7 @@ extension SKNode {
     var nodesAsSKNodes = nodes as [SKNode]
     var childNodesToRemove = [SKNode]()
     for child in self.childNodes {
-      if(contains(nodesAsSKNodes, child)) {
+      if contains(nodesAsSKNodes, child) {
         childNodesToRemove.append(child)
         self.removedChild(child)
       }
@@ -278,9 +243,9 @@ extension SKNode {
   
   private var componentContainer:InternalComponentContainer {
     get {
-//      println(SharedComponentManager.sharedInstance.mapTable.count)
+//      println(SharedComponentManager.sharedInstance.mapTable)
       var manager = SharedComponentManager.sharedInstance.mapTable.objectForKey(self) as InternalComponentContainer?
-      if(manager == nil) {
+      if manager == nil {
         manager = InternalComponentContainer()
         SharedComponentManager.sharedInstance.mapTable.setObject(manager!, forKey: self)
       }
@@ -297,6 +262,38 @@ extension SKNode {
     //    }
   }
   
+}
+
+private class SharedComponentManager {
+  let mapTable:NSMapTable = NSMapTable(keyOptions: NSPointerFunctionsOpaquePersonality|NSPointerFunctionsWeakMemory, valueOptions: NSPointerFunctionsStrongMemory)
+  class var sharedInstance : SharedComponentManager {
+  struct Static {
+    static var onceToken : dispatch_once_t = 0
+    static var instance : SharedComponentManager? = nil
+    }
+    dispatch_once(&Static.onceToken) {
+      
+      func swizzleExchangeMethodsOnClass(cls: AnyClass, replaceSelector fromSelector:String, withSelector toSelector:String) {
+        var originalMethod: Method?
+        var swizzledMethod: Method?
+        
+        originalMethod = class_getInstanceMethod(SKNode.classForCoder(), Selector.convertFromStringLiteral(fromSelector))
+        swizzledMethod = class_getInstanceMethod(SKNode.classForCoder(), Selector.convertFromStringLiteral(toSelector))
+        
+        if originalMethod != nil && swizzledMethod != nil { method_exchangeImplementations(originalMethod!, swizzledMethod!) }
+        
+      }
+      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "addChild:", withSelector:"internalAddChild:")
+      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "insertChild:atIndex:", withSelector:"internalInsertChild:atIndex:")
+      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeChildrenInArray:", withSelector:"internalRemoveChildrenInArray:")
+      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeAllChildren", withSelector:"internalRemoveAllChildren")
+      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeFromParent", withSelector:"internalRemoveFromParent")
+      
+      Static.instance = SharedComponentManager()
+      
+    }
+    return Static.instance!
+  }
 }
 
 

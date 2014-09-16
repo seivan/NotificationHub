@@ -30,6 +30,11 @@ class MyScene : SKScene {
  
 }
 
+class GravityLess : Component {
+  var isEnabled:Bool = true
+  weak var node:SKNode?
+  
+}
 
 class Movement : Component {
   var isEnabled:Bool = true
@@ -43,16 +48,20 @@ class Movement : Component {
       case Player
     }
     if(self.node?.name == "ENEMY") {
+      let p = self.node?.physicsBody
+      self.node?.physicsBody = nil
+      self.node?.position = CGPoint(x: 100, y: 100)
+      self.node?.physicsBody = p
       self.node?.physicsBody?.categoryBitMask = Contact.Enemy.toRaw()
       self.node?.physicsBody?.contactTestBitMask = Contact.Player.toRaw()
-      self.node?.physicsBody?.collisionBitMask = Contact.Player.toRaw()
+      self.node?.physicsBody?.collisionBitMask = 0//Contact.Player.toRaw()
 
       
     }
     else {
       self.node?.physicsBody?.categoryBitMask = Contact.Player.toRaw()
       self.node?.physicsBody?.contactTestBitMask = Contact.Enemy.toRaw()
-      self.node?.physicsBody?.collisionBitMask = Contact.Enemy.toRaw()
+      self.node?.physicsBody?.collisionBitMask = 0//Contact.Enemy.toRaw()
     }
     self.node?.physicsBody?.dynamic = true
 
@@ -89,10 +98,15 @@ class Movement : Component {
     println("didSimulatePhysics Movement \(self.node?.name)")
   }
   func didBeginContact(contact:SKPhysicsContact) {
-    println("didBeginContact \(contact) Movement \(self.node?.name)")
+//    println("didBeginContact \(contact) Movement \(self.node?.name)")
   }
   func didEndContact(contact:SKPhysicsContact) {
-    println("didEndContact \(contact) Movement \(self.node?.name)")
+//    println("didEndContact \(contact) Movement \(self.node?.name)")
+    if self.node?.name == "ENEMY" {
+      let node = self.node!
+      self.node?.removeComponentWithClass(Movement.self)
+      node.addComponent(Movement())
+    }
 
     
   }
