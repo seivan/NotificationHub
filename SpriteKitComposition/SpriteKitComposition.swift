@@ -121,11 +121,7 @@ extension SKNode {
   }
   
   public func didBeginContact(contact: SKPhysicsContact) {
-    let componentsA = contact.bodyA.node?.components ?? [Component]()
-    let componentsB = contact.bodyB.node?.components ?? [Component]()
-    let allComponents = componentsA + componentsB
-    for component in allComponents { if component.isEnabled { component.didBeginContact?(contact) } }
-
+    super.internalDidBeginContact(contact)
   }
   
   public func didEndContact(contact: SKPhysicsContact) {
@@ -168,6 +164,32 @@ extension SKNode {
   private func internalDidFinishUpdate() {
     for component in self.components { if component.isEnabled  { component.didFinishUpdate?() } }
     for child in self.childNodes     { child.internalDidFinishUpdate()  }
+    
+  }
+
+  private func internalChildDidBeginContact(contact: SKPhysicsContact) {
+    for component in self.components { if component.isEnabled { component.didBeginContact?(contact) } }
+    for child in self.childNodes     { child.internalChildDidBeginContact(contact)  }
+  }
+  
+  private func internalDidBeginContact(contact: SKPhysicsContact) {
+
+
+    
+    let nodeA = contact.bodyA.node
+    let nodeB = contact.bodyA.node
+
+    let componentsA = nodeA?.components ?? [Component]()
+    let componentsB = nodeB?.components ?? [Component]()
+    
+    let allComponents = componentsA + componentsB
+    let allNodes = (nodeA?.childNodes ?? [SKNode]()) + (nodeB?.childNodes ?? [SKNode]())
+    
+    for component in self.components { if component.isEnabled  { component.didBeginContact?(contact) } }
+    for component in allComponents { if component.isEnabled { component.didBeginContact?(contact) } }
+    for sprite in allNodes { sprite.internalChildDidBeginContact(contact) }
+    
+
     
   }
 
