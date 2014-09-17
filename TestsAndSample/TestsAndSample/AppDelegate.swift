@@ -60,6 +60,11 @@ class GravityLessBounds : Component {
   
 }
 
+enum Contact : UInt32 {
+  case Pinned
+  case Moving
+}
+
 class Physical : Component {
   var isEnabled:Bool = true
   weak var node:SKNode?
@@ -69,93 +74,50 @@ class Physical : Component {
   
 }
 
-class Reseting : Component {
+class Pinned : Component {
   var isEnabled:Bool = true
   weak var node:SKNode?
+
   func didAddToNode() {
-    
+    self.node?.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 40, height: 40))
+    self.node?.physicsBody?.categoryBitMask = Contact.Pinned.toRaw()
+    self.node?.physicsBody?.contactTestBitMask = Contact.Moving.toRaw()
+    self.node?.physicsBody?.collisionBitMask = Contact.Moving.toRaw()
+
   }
 }
 
-class Movement : Component {
+
+class Reseting : Component {
   var isEnabled:Bool = true
   weak var node:SKNode?
+
   func didAddToNode() {
-    println("didAddToNode Movement \(self.node?.name)")
     self.node?.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 40, height: 40))
-    //    player.physicsBody?.collisionBitMask = 1
-    enum Contact : UInt32 {
-      case Enemy
-      case Player
-    }
-    if(self.node?.name == "ENEMY") {
-      let p = self.node?.physicsBody
-      self.node?.physicsBody = nil
-      self.node?.position = CGPoint(x: 100, y: 100)
-      self.node?.physicsBody = p
-      self.node?.physicsBody?.categoryBitMask = Contact.Enemy.toRaw()
-      self.node?.physicsBody?.contactTestBitMask = Contact.Player.toRaw()
-      self.node?.physicsBody?.collisionBitMask = 0//Contact.Player.toRaw()
-
-      
-    }
-    else {
-      self.node?.physicsBody?.categoryBitMask = Contact.Player.toRaw()
-      self.node?.physicsBody?.contactTestBitMask = Contact.Enemy.toRaw()
-      self.node?.physicsBody?.collisionBitMask = 0//Contact.Enemy.toRaw()
-    }
-    self.node?.physicsBody?.dynamic = true
-
+    let p = self.node?.physicsBody
+    self.node?.physicsBody = nil
+    self.node?.position = CGPoint(x: 100, y: 100)
+    self.node?.physicsBody = p
+    self.node?.physicsBody?.categoryBitMask = Contact.Moving.toRaw()
+    self.node?.physicsBody?.contactTestBitMask = Contact.Pinned.toRaw()
+    self.node?.physicsBody?.collisionBitMask = Contact.Pinned.toRaw()
   }
-  func didRemoveFromNode() {
-    println("didRemoveFromNode Movement \(self.node?.name)")
-  }
-  
   func didAddNodeToScene() {
     println("didAddNodeToScene Movement \(self.node?.name) and scene \(self.node?.scene?.name)")
-    if(self.node?.name == "ENEMY") {
-      self.node?.physicsBody?.applyImpulse(CGVector(5.0,5.0))
-    }
-
+    self.node?.physicsBody?.applyImpulse(CGVector(5.0,5.0))
   }
   
-  func didRemoveNodeFromScene() {
-    println("didRemoveNodeFromScene Movement \(self.node?.name)")
-  }
-  func didUpdate(time:NSTimeInterval) {
-//    println("didUpdate \(time) Movement \(self.node?.name)")
-    if(self.node?.name == "ENEMY") {
-//     self.node?.physicsBody?.applyImpulse(CGVector(5.0,5.0))
-   //   println(self.node?.physicsBody?)
-    }
-  }
-  func didChangeSceneSizedFrom(previousSize:CGSize) {
-    println("didChangeSceneSizedFrom \(previousSize) Movement \(self.node?.name)")
-  }
-  func didEvaluateActions() {
-//    println("didEvaluateActions Movement \(self.node?.name)")
-  }
-  func didSimulatePhysics() {
-//    println("didSimulatePhysics Movement \(self.node?.name)")
-  }
-  func didBeginContact(contact:SKPhysicsContact) {
-//    println("didBeginContact \(contact) Movement \(self.node?.name)")
-  }
   func didEndContact(contact:SKPhysicsContact) {
-//    println("didEndContact \(contact) Movement \(self.node?.name)")
-    if self.node?.name == "ENEMY" {
-      let node = self.node!
-      self.node?.removeComponentWithClass(Movement.self)
-      node.addComponent(Movement())
-    }
-  }
-  
-  func didFinishUpdate() {
-    println("didFinishUpdate MOVEMENT \(self.node?.name)")
-    
+    let node = self.node!
+//    self.node?.removeComponentWithClass(Reseting.self)
+//    node.addComponent(Reseting())
+    self.node?.componentWithClass(Reseting.self)?.didAddToNode?()
+
+
+
   }
 
-  
+
 }
 
 
@@ -210,8 +172,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     player.addChild(gun)
 
     
-    enemy.addComponent(Movement())
-    player.addComponent(Movement())
+    enemy.addComponent(Reseting())
+    player.addComponent(Pinned())
 //    gun.addComponent(Life())
     
     scene.addComponent(GravityLessBounds())
