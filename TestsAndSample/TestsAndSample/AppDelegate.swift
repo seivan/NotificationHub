@@ -32,10 +32,49 @@ class MyScene : SKScene {
  
 }
 
-class GravityLess : Component {
+class SceneDebugger : Component {
   var isEnabled:Bool = true
   weak var node:SKNode?
+  func didAddToNode() {
+    let skView = (self.node as SKScene).view
+    skView?.showsFPS = true
+    skView?.showsNodeCount = true
+    skView?.showsDrawCount = true
+    skView?.showsQuadCount = true
+    skView?.showsPhysics = true
+    skView?.showsFields = true
+    skView?.setValue(NSNumber(bool: true), forKey: "_showsCulledNodesInNodeCount")
+  }
   
+}
+
+class GravityLessBounds : Component {
+  var isEnabled:Bool = true
+  weak var node:SKNode?
+  func didAddToNode() {
+    let scene = (self.node as SKScene)
+    scene.physicsWorld.gravity = CGVector(0,0)
+    scene.physicsBody = SKPhysicsBody(edgeLoopFromRect: scene.frame)
+
+  }
+  
+}
+
+class Physical : Component {
+  var isEnabled:Bool = true
+  weak var node:SKNode?
+  func didAddToNode() {
+    self.node?.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 40, height: 40))
+  }
+  
+}
+
+class Reseting : Component {
+  var isEnabled:Bool = true
+  weak var node:SKNode?
+  func didAddToNode() {
+    
+  }
 }
 
 class Movement : Component {
@@ -120,48 +159,6 @@ class Movement : Component {
 }
 
 
-class Life :  Component {
-  var isEnabled:Bool = true
-  weak var node:SKNode?
-  func didAddToNode() {
-    println("didAddToNode LIVING \(self.node?.name)")
-  }
-  func didRemoveFromNode() {
-    println("didRemoveFromNode LIVING \(self.node?.name)")
-  }
-
-  func didAddNodeToScene() {
-    println("didAddNodeToScene LIVING \(self.node?.name) and scene \(self.node?.scene?.name)")
-  }
-
-  func didRemoveNodeFromScene() {
-    println("didRemoveNodeFromScene LIVING \(self.node?.name)")
-  }
-  func didUpdate(time:NSTimeInterval) {
-//    println("didUpdate \(time) LIVING  \(self.node?.name)")
-  }
-  func didChangeSceneSizedFrom(previousSize:CGSize) {
-    println("didChangeSceneSizedFrom \(previousSize) LIVING \(self.node?.name)")
-  }
-  func didEvaluateActions() {
-//    println("didEvaluateActions LIVING \(self.node?.name)")
-  }
-  func didSimulatePhysics() {
-//    println("didSimulatePhysics LIVING \(self.node?.name)")
-  }
-  func didBeginContact(contact:SKPhysicsContact) {
-    println("didBeginContact \(contact) LIVING \(self.node?.name)")
-  }
-  func didEndContact(contact:SKPhysicsContact) {
-    println("didEndContact \(contact) LIVING \(self.node?.name)")
-  }
-  func didFinishUpdate() {
-    println("didFinishUpdate LIVING \(self.node?.name)")
-
-  }
-
-  
-}
 
 
 
@@ -181,13 +178,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Configure the view.
     let scene = MyScene(size: controller.view.frame.size)
     let skView = controller.view as SKView
-//    skView.showsFPS = true
-//    skView.showsNodeCount = true
-//    skView.showsDrawCount = true
-//    skView.showsQuadCount = true
-//    skView.showsPhysics = true
-//    skView.showsFields = true
-//    skView.setValue(NSNumber(bool: true), forKey: "_showsCulledNodesInNodeCount")
     /* Sprite Kit applies additional optimizations to improve rendering performance */
     skView.ignoresSiblingOrder = true
     /* Set the scale mode to scale to fit the window */
@@ -213,8 +203,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     
-    scene.physicsWorld.gravity = CGVector(0,0)
-    scene.physicsBody = SKPhysicsBody(edgeLoopFromRect: scene.frame)
 
     
     let gun = SKNode()
@@ -224,8 +212,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     enemy.addComponent(Movement())
     player.addComponent(Movement())
-    gun.addComponent(Life())
-
+//    gun.addComponent(Life())
+    
+    scene.addComponent(GravityLessBounds())
+    scene.addComponent(SceneDebugger())
     
     scene.addChild(enemy)
     scene.addChild(player)

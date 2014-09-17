@@ -193,7 +193,7 @@ extension SKNode {
   }
 
   private func internalRecursiveDidEndContact(contact: SKPhysicsContact) {
-    for component in self.components { if component.isEnabled { component.didBeginContact?(contact) } }
+    for component in self.components { if component.isEnabled { component.didEndContact?(contact) } }
     for child in self.childNodes     { child.internalRecursiveDidEndContact(contact)  }
   }
 
