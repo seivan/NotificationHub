@@ -71,7 +71,6 @@ extension SKNode {
   func removeComponentWithKey(key:String) -> Bool {
     if let componentToRemove = self.componentContainer.components.removeValueForKey(key) {
       componentToRemove.isEnabled = false
-//      componentToRemove.node = nil
       componentToRemove.didRemoveFromNode?()
       
       return true
