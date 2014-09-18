@@ -10,11 +10,37 @@ import UIKit
 import SpriteKit
 
 
+class Player : SKSpriteNode {
+
+
+  override init(texture: SKTexture!, color: UIColor!, size: CGSize) {
+    super.init(texture:texture, color:color, size:size)
+
+  }
+  
+  init(color: UIColor!, size: CGSize) {
+    super.init()
+    self.color = color
+    self.size = size
+  }
+  
+
+  required init(coder aDecoder: NSCoder) {
+    super.init(coder: aDecoder)
+      fatalError("init(coder:) has not been implemented")
+  }
+  
+  func didEndContact(contact: SKPhysicsContact) {
+    println("DID END CONTACT")
+    
+  }
+}
+
+//color: UIColor.blueColor(), size: CGSize(width: 40, height: 40))
 
 class MyScene : SKScene {
   override func update(currentTime: NSTimeInterval) {
     super.update(currentTime)
-
   }
   override func didEvaluateActions() {
     super.didEvaluateActions()
@@ -77,14 +103,24 @@ class Physical : Component {
 class Pinned : Component {
   var isEnabled:Bool = true
   weak var node:SKNode?
-
-  func didAddToNode() {
+//   override func didAddToNode() {
+   func didAddToNode() {
+//    super.didAddToNode()
+    self.node?.physicsBody = nil
+    self.node?.position = CGPoint(x: 200, y: 200)
     self.node?.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 40, height: 40))
-    self.node?.physicsBody?.categoryBitMask = Contact.Pinned.toRaw()
-    self.node?.physicsBody?.contactTestBitMask = Contact.Moving.toRaw()
-    self.node?.physicsBody?.collisionBitMask = Contact.Moving.toRaw()
+    self.node?.physicsBody?.categoryBitMask = Contact.Pinned.rawValue
+    self.node?.physicsBody?.contactTestBitMask = Contact.Moving.rawValue
+    self.node?.physicsBody?.collisionBitMask = Contact.Moving.rawValue
 
   }
+  
+  func didEndContact(contact:SKPhysicsContact) {
+    self.node?.removeComponentWithClass(Pinned.self)
+    self.node?.addComponent(Pinned())
+    
+  }
+
 }
 
 
@@ -93,27 +129,21 @@ class Reseting : Component {
   weak var node:SKNode?
 
   func didAddToNode() {
-    self.node?.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 40, height: 40))
-    let p = self.node?.physicsBody
     self.node?.physicsBody = nil
     self.node?.position = CGPoint(x: 100, y: 100)
-    self.node?.physicsBody = p
-    self.node?.physicsBody?.categoryBitMask = Contact.Moving.toRaw()
-    self.node?.physicsBody?.contactTestBitMask = Contact.Pinned.toRaw()
-    self.node?.physicsBody?.collisionBitMask = Contact.Pinned.toRaw()
+    self.node?.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 40, height: 40))
+    self.node?.physicsBody?.categoryBitMask = Contact.Moving.rawValue
+    self.node?.physicsBody?.contactTestBitMask = Contact.Pinned.rawValue
+    self.node?.physicsBody?.collisionBitMask = Contact.Pinned.rawValue
   }
+  
   func didAddNodeToScene() {
-    println("didAddNodeToScene Movement \(self.node?.name) and scene \(self.node?.scene?.name)")
     self.node?.physicsBody?.applyImpulse(CGVector(5.0,5.0))
   }
   
   func didEndContact(contact:SKPhysicsContact) {
-    let node = self.node!
-//    self.node?.removeComponentWithClass(Reseting.self)
-//    node.addComponent(Reseting())
-    self.node?.componentWithClass(Reseting.self)?.didAddToNode?()
-
-
+    self.node?.removeComponent(self)
+    self.node?.addComponent(Reseting())
 
   }
 
@@ -154,13 +184,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     
 
-    let enemy = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: 40, height: 40))
-    enemy.position = CGPoint(x: 100, y: 100)
+    let enemy = Player(color: UIColor.redColor(), size: CGSize(width: 40, height: 40))
     enemy.name = "ENEMY"
     
     
-    let player = SKSpriteNode(color: UIColor.blueColor(), size: CGSize(width: 40, height: 40))
-    player.position = CGPoint(x: 200, y: 200)
+    let player = Player(color: UIColor.blueColor(), size:  CGSize(width: 40, height: 40))
     player.name = "PLAYER"
 
 
@@ -174,7 +202,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     enemy.addComponent(Reseting())
     player.addComponent(Pinned())
-//    gun.addComponent(Life())
+
     
     scene.addComponent(GravityLessBounds())
     scene.addComponent(SceneDebugger())

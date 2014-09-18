@@ -11,16 +11,15 @@ import SpriteKit
 
   //Cares about isEnabled
   optional func didUpdate(time:NSTimeInterval)
-  optional func didChangeSceneSizedFrom(previousSize:CGSize)
   optional func didEvaluateActions()
   optional func didSimulatePhysics()
   optional func didBeginContact(contact:SKPhysicsContact)
   optional func didEndContact(contact:SKPhysicsContact)
-  @availability(iOS, introduced=8.0)
   optional func didApplyConstraints()
   optional func didFinishUpdate()
 
   //Doesn't care about isEnabled
+  optional func didChangeSceneSizedFrom(previousSize:CGSize)
   optional func didMoveToView(view: SKView)
   optional func willMoveFromView(view: SKView)
   optional func didChangeSize(oldSize: CGSize)
@@ -72,7 +71,7 @@ extension SKNode {
   func removeComponentWithKey(key:String) -> Bool {
     if let componentToRemove = self.componentContainer.components.removeValueForKey(key) {
       componentToRemove.isEnabled = false
-      componentToRemove.node = nil
+//      componentToRemove.node = nil
       componentToRemove.didRemoveFromNode?()
       
       return true
@@ -329,6 +328,4 @@ private class SharedComponentManager {
     return Static.instance!
   }
 }
-
-
 
