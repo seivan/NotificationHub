@@ -15,7 +15,6 @@ class Player : SKSpriteNode {
 
   override init(texture: SKTexture!, color: UIColor!, size: CGSize) {
     super.init(texture:texture, color:color, size:size)
-
   }
   
   init(color: UIColor!, size: CGSize) {
@@ -32,11 +31,24 @@ class Player : SKSpriteNode {
   
   func didEndContact(contact: SKPhysicsContact) {
     println("DID END CONTACT")
-    
   }
+  
 }
 
 //color: UIColor.blueColor(), size: CGSize(width: 40, height: 40))
+
+class Toucher : Component {
+  var isEnabled:Bool = true
+  weak var node:SKNode?
+
+  func didAddToNode() {
+    self.node?.userInteractionEnabled = true
+  }
+
+  func touchesBegan(touches: [UITouch], withEvent event: UIEvent) {
+    println("TOUCH \(self.node?.name)")
+  }
+}
 
 class MyScene : SKScene {
   override func update(currentTime: NSTimeInterval) {
@@ -70,8 +82,8 @@ class SceneDebugger : Component {
     skView?.showsPhysics = true
     skView?.showsFields = true
     skView?.setValue(NSNumber(bool: true), forKey: "_showsCulledNodesInNodeCount")
+//    skView?.multipleTouchEnabled = true
   }
-  
 }
 
 class GravityLessBounds : Component {
@@ -81,7 +93,6 @@ class GravityLessBounds : Component {
     let scene = (self.node as SKScene)
     scene.physicsWorld.gravity = CGVector(0,0)
     scene.physicsBody = SKPhysicsBody(edgeLoopFromRect: scene.frame)
-
   }
   
 }
@@ -207,20 +218,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     scene.addComponent(GravityLessBounds())
     scene.addComponent(SceneDebugger())
     
+    scene.addComponent(Toucher())
+    player.addComponent(Toucher())
+
     scene.addChild(enemy)
     scene.addChild(player)
 
-//    scene.removeChildrenInArray([player,gun])
-//    scene.insertChild(player, atIndex: 0)
-//    let g = SKScene()
-//    g.name = "GGGGGGGGGGG"
-//    skView.presentScene(g)
-//     g.addChild(player)
-
-//    scene.insertChild(player, atIndex: 0)
-//    scene.removeChildrenInArray([player])
-    
-    
     return true
   }
 

@@ -13,10 +13,16 @@ import SpriteKit
   optional func didUpdate(time:NSTimeInterval)
   optional func didEvaluateActions()
   optional func didSimulatePhysics()
-  optional func didBeginContact(contact:SKPhysicsContact)
-  optional func didEndContact(contact:SKPhysicsContact)
   optional func didApplyConstraints()
   optional func didFinishUpdate()
+
+  optional func didBeginContactWithNode(node:SKNode, contact:SKPhysicsContact)
+  optional func didEndContactWithNode(node:SKNode, contact:SKPhysicsContact)
+  
+  optional func didBeginContact(contact:SKPhysicsContact)
+  optional func didEndContact(contact:SKPhysicsContact)
+
+  optional func touchesBegan(touches: [UITouch], withEvent event: UIEvent)
 
   //Doesn't care about isEnabled
   optional func didChangeSceneSizedFrom(previousSize:CGSize)
@@ -27,25 +33,25 @@ import SpriteKit
 }
 
 
-private class InternalComponentContainer {
+final private class InternalComponentContainer {
   var components = [String:Component]()
   var lastUpdateTimeInterval:NSTimeInterval = 0
 }
 
 
 extension SKNode {
-  var components:[Component] { return self.componentContainer.components.values.array }
-  var childNodes:[SKNode]    { return self.children as [SKNode]                       }
+  final var components:[Component] { return self.componentContainer.components.values.array }
+  final var childNodes:[SKNode]    { return self.children as [SKNode]                       }
   
-  func componentWithClass(theClass:AnyClass) -> Component? {
+  final func componentWithClass(theClass:AnyClass) -> Component? {
     return self.componentContainer.components[NSStringFromClass(theClass)]
   }
   
-  func componentWithKey(key:String) -> Component? {
+  final func componentWithKey(key:String) -> Component? {
     return self.componentContainer.components[key]
   }
   
-  func addComponent<T:Component>(component:T, withKey key:String) -> Bool {
+  final func addComponent<T:Component>(component:T, withKey key:String) -> Bool {
     if self.componentContainer.components[key] == nil {
       self.componentContainer.components[key] = component
       component.node = self
@@ -58,17 +64,17 @@ extension SKNode {
     
   }
   
-  func addComponent<T:Component>(component:T) -> Bool {
+  final func addComponent<T:Component>(component:T) -> Bool {
     let key = NSStringFromClass(component.dynamicType)
     return self.addComponent(component, withKey: key)
   }
   
-  func removeComponentWithClass(theClass:AnyClass) -> Bool {
+  final func removeComponentWithClass(theClass:AnyClass) -> Bool {
     let key = NSStringFromClass(theClass)
     return self.removeComponentWithKey(key)
   }
   
-  func removeComponentWithKey(key:String) -> Bool {
+  final func removeComponentWithKey(key:String) -> Bool {
     if let componentToRemove = self.componentContainer.components.removeValueForKey(key) {
       componentToRemove.isEnabled = false
       componentToRemove.didRemoveFromNode?()
@@ -78,7 +84,7 @@ extension SKNode {
     else { return false }
   }
   
-  func removeComponent<T:Component>(component:T) -> Bool {
+  final func removeComponent<T:Component>(component:T) -> Bool {
     var foundKey:String?
     for (key, value) in self.componentContainer.components {
       if value === component {
@@ -94,7 +100,7 @@ extension SKNode {
 
 
 
- extension SKScene : SKPhysicsContactDelegate {
+extension SKScene : SKPhysicsContactDelegate {
   public func update(currentTime: NSTimeInterval) {
     let container = self.componentContainer
     var timeSinceLast: CFTimeInterval = currentTime - container.lastUpdateTimeInterval
@@ -114,9 +120,14 @@ extension SKNode {
     super.internalDidSimulatePhysics()
   }
   
+  /* Constraints
+  
+  */
+  
   public func didFinishUpdate() {
     super.internalDidFinishUpdate()
   }
+  
   
   public func didBeginContact(contact: SKPhysicsContact) {
     super.internalDidBeginContact(contact)
@@ -134,35 +145,39 @@ extension SKNode {
   public func willMoveFromView(view: SKView) {
     
   }
-
+  
 
 
 }
 
 extension SKNode {
   
-  private func internalUpdate(currentTime: NSTimeInterval) {
+  final private func internalUpdate(currentTime: NSTimeInterval) {
     for component in self.components { if component.isEnabled { component.didUpdate?(currentTime) } }
     for child in self.childNodes     { child.internalUpdate(currentTime) }
   }
 
-  private func internalDidEvaluateActions() {
+  final private func internalDidEvaluateActions() {
     for component in self.components { if component.isEnabled { component.didEvaluateActions?() } }
     for child in self.childNodes     { child.internalDidEvaluateActions()  }
   }
   
-  private func internalDidSimulatePhysics() {
+  final private func internalDidSimulatePhysics() {
     for component in self.components { if component.isEnabled { component.didSimulatePhysics?() } }
     for child in self.childNodes     { child.internalDidSimulatePhysics()  }
   }
   
-  private func internalDidFinishUpdate() {
+  /* Constraints
+  
+  */
+
+  final private func internalDidFinishUpdate() {
     for component in self.components { if component.isEnabled  { component.didFinishUpdate?() } }
     for child in self.childNodes     { child.internalDidFinishUpdate()  }
     
   }
 
-  private func tupleForContact(contact: SKPhysicsContact) -> (allComponents: [Component], allNodes: [SKNode]) {
+  final private func tupleForContact(contact: SKPhysicsContact) -> (allComponents: [Component], allNodes: [SKNode]) {
     let nodeA = contact.bodyA.node
     let nodeB = contact.bodyB.node
     
@@ -176,35 +191,49 @@ extension SKNode {
 
   }
 
-  private func internalRecursiveDidBeginContact(contact: SKPhysicsContact) {
+  final private func internalRecursiveDidBeginContact(contact: SKPhysicsContact) {
     for component in self.components { if component.isEnabled { component.didBeginContact?(contact) } }
     for child in self.childNodes     { child.internalRecursiveDidBeginContact(contact)  }
   }
   
   
-  private func internalDidBeginContact(contact: SKPhysicsContact) {
-    let tuple = self.tupleForContact(contact)
-    for component in self.components      { if component.isEnabled { component.didBeginContact?(contact) } }
-    for component in tuple.allComponents  { if component.isEnabled { component.didBeginContact?(contact) } }
-    for sprite    in tuple.allNodes       { sprite.internalRecursiveDidBeginContact(contact) }
-    
+  final private func internalDidBeginContact(contact: SKPhysicsContact) {
+    let tupleForContact = self.tupleForContact(contact)
+    for component in self.components                { if component.isEnabled { component.didBeginContact?(contact) } }
+    for component in tupleForContact.allComponents  { if component.isEnabled { component.didBeginContact?(contact) } }
+    for sprite    in tupleForContact.allNodes       { sprite.internalRecursiveDidBeginContact(contact) }
   }
 
-  private func internalRecursiveDidEndContact(contact: SKPhysicsContact) {
+  final private func internalRecursiveDidEndContact(contact: SKPhysicsContact) {
     for component in self.components { if component.isEnabled { component.didEndContact?(contact) } }
     for child in self.childNodes     { child.internalRecursiveDidEndContact(contact)  }
   }
 
-  private func internalDidEndContact(contact: SKPhysicsContact) {
-    let tuple = self.tupleForContact(contact)
-    for component in self.components      { if component.isEnabled { component.didEndContact?(contact) } }
-    for component in tuple.allComponents  { if component.isEnabled { component.didEndContact?(contact) } }
-    for sprite    in tuple.allNodes       { sprite.internalRecursiveDidEndContact(contact) }
+  final private func internalDidEndContact(contact: SKPhysicsContact) {
+    let tupleForContact = self.tupleForContact(contact)
+    for component in self.components                { if component.isEnabled { component.didEndContact?(contact) } }
+    for component in tupleForContact.allComponents  { if component.isEnabled { component.didEndContact?(contact) } }
+    for sprite    in tupleForContact.allNodes       { sprite.internalRecursiveDidEndContact(contact) }
     
   }
-
   
-  private func addedChild(node:SKNode) {
+  
+  final private func internalTouchesBegan(touches: [UITouch], withEvent event: UIEvent) {
+    for component in self.components { if component.isEnabled { component.touchesBegan?(touches, withEvent: event) } }
+//    for child in self.childNodes     { child.internalTouchesBegan(touches, withEvent: event) }
+    
+  }
+  
+   override public func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+    let touchesList:[UITouch] = touches.allObjects as [UITouch]
+    self.internalTouchesBegan(touchesList, withEvent: event)
+  }
+
+}
+
+extension SKNode {
+  
+  final private func addedChild(node:SKNode) {
     if self is SKScene {
       for component in node.components { component.didAddNodeToScene?() }
       for childNode in node.childNodes { node.addedChild(childNode) }
@@ -217,7 +246,7 @@ extension SKNode {
   
   
   
-  func internalAddChild(node:SKNode!) {
+  final func internalAddChild(node:SKNode!) {
     if node.parent != self {
       node.removeFromParent()
       self.internalAddChild(node)
@@ -226,7 +255,7 @@ extension SKNode {
     
   }
   
-  func internalInsertChild(node: SKNode!, atIndex index: Int) {
+  final func internalInsertChild(node: SKNode!, atIndex index: Int) {
     if node.parent != self {
       node.removeFromParent()
       self.internalInsertChild(node, atIndex: index)
@@ -235,7 +264,7 @@ extension SKNode {
     
   }
   
-  private func removedChild(node:SKNode) {
+  final private func removedChild(node:SKNode) {
     if self is SKScene {
       for component in node.components { component.didRemoveNodeFromScene?() }
       for childNode in node.childNodes { node.removedChild(childNode) }
@@ -248,7 +277,7 @@ extension SKNode {
   }
   
   
-  func internalRemoveChildrenInArray(nodes: [AnyObject]!) {
+  final func internalRemoveChildrenInArray(nodes: [AnyObject]!) {
     var nodesAsSKNodes = nodes as [SKNode]
     var childNodesToRemove = [SKNode]()
     for child in self.childNodes {
@@ -260,12 +289,12 @@ extension SKNode {
     self.internalRemoveChildrenInArray(childNodesToRemove)
   }
   
-  func internalRemoveAllChildren() {
+  final func internalRemoveAllChildren() {
     for child in self.childNodes { self.removedChild(child) }
     self.internalRemoveAllChildren()
   }
   
-  func internalRemoveFromParent() {
+  final func internalRemoveFromParent() {
     self.parent?.removedChild(self)
     self.internalRemoveFromParent()
     
@@ -273,7 +302,7 @@ extension SKNode {
   
   
   
-  private var componentContainer:InternalComponentContainer {
+  final private var componentContainer:InternalComponentContainer {
     get {
 //      println(SharedComponentManager.sharedInstance.mapTable)
       var manager = SharedComponentManager.sharedInstance.mapTable.objectForKey(self) as InternalComponentContainer?
@@ -296,7 +325,7 @@ extension SKNode {
   
 }
 
-private class SharedComponentManager {
+final private class SharedComponentManager {
   let mapTable:NSMapTable = NSMapTable(keyOptions: NSPointerFunctionsOpaquePersonality|NSPointerFunctionsWeakMemory, valueOptions: NSPointerFunctionsStrongMemory)
   class var sharedInstance : SharedComponentManager {
   struct Static {
