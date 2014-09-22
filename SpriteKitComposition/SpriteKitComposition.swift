@@ -1,9 +1,7 @@
 import SpriteKit
 
 
-@objc protocol Component {
-  var isEnabled:Bool { get set }
-  weak var node:SKNode? { get set}
+@objc private protocol ComponentBehaviour {
   optional func didAddToNode()
   optional func didRemoveFromNode()
   optional func didAddNodeToScene()
@@ -32,6 +30,37 @@ import SpriteKit
   
 }
 
+@objc public class Component : ComponentBehaviour {
+  var isEnabled:Bool = true
+  private(set) weak var node:SKNode?
+  private var behaviour:ComponentBehaviour { self as ComponentBehaviour }
+  init() {  }
+  
+  
+  final private func setupSubscribers() {
+    NSNotificationCenter.defaultCenter().removeObserver(self)
+    if self.behaviour.didAddNodeToScene?() != nil {
+      NSNotificationCenter.defaultCenter().addObserver(self, selector: "internalDidAddNodeToScene", name: "internalDidAddNodeToScene", object: self.node?)
+    }
+  }
+  
+  final private func internalDidAddToNode() {
+    self.setupSubscribers()
+    self.behaviour.didAddToNode?()
+  }
+
+  final private func internalDidAddNodeToScene() {
+    self.behaviour.didAddNodeToScene?()
+  }
+  
+  deinit {
+    NSNotificationCenter.defaultCenter().removeObserver(self)
+  }
+  
+}
+
+
+
 
 final private class InternalComponentContainer {
   var components = [String:Component]()
@@ -56,8 +85,8 @@ extension SKNode {
       self.componentContainer.components[key] = component
       component.node = self
       component.isEnabled = true
-      component.didAddToNode?()
-      if self.scene != nil { component.didAddNodeToScene?() }
+      component.internalDidAddToNode()
+      if self.scene != nil { component.behaviour.didAddNodeToScene?() }
       return true
     }
     else { return false }
@@ -77,7 +106,7 @@ extension SKNode {
   final func removeComponentWithKey(key:String) -> Bool {
     if let componentToRemove = self.componentContainer.components.removeValueForKey(key) {
       componentToRemove.isEnabled = false
-      componentToRemove.didRemoveFromNode?()
+      componentToRemove.behaviour.didRemoveFromNode?()
       
       return true
     }
