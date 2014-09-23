@@ -39,22 +39,58 @@ import SpriteKit
   
   final private func setupSubscribers() {
     NSNotificationCenter.defaultCenter().removeObserver(self)
-    if self.behaviour.didAddNodeToScene?() != nil {
-      NSNotificationCenter.defaultCenter().addObserver(self, selector: "internalDidAddNodeToScene", name: "internalDidAddNodeToScene", object: self.node?)
+    let center = NSNotificationCenter.defaultCenter()
+    
+    if self.behaviour.didUpdate? != nil {
+      center.addObserver(self, selector: "notificationDidUpdate:", name: "notificationDidUpdate", object: self.node?.scene)
     }
+    if self.behaviour.didEvaluateActions? != nil {
+      center.addObserver(self, selector: "notificationDidEvaluateActions:", name: "notificationDidEvaluateActions", object: self.node?.scene)
+    }
+    if self.behaviour.didSimulatePhysics? != nil {
+      center.addObserver(self, selector: "notificationDidSimulatePhysics:", name: "notificationDidSimulatePhysics", object: self.node?.scene)
+    }
+    if self.behaviour.didFinishUpdate? != nil {
+      center.addObserver(self, selector: "notificationDidFinishUpdate:", name: "notificationDidFinishUpdate", object: self.node?.scene)
+    }
+    if self.behaviour.didBeginContact? != nil {
+      center.addObserver(self, selector: "notificationDidBeginContact:", name: "notificationDidBeginContact", object: self.node?.scene)
+    }
+    if self.behaviour.didEndContact? != nil {
+      center.addObserver(self, selector: "notificationDidEndContact:", name: "notificationDidEndContact", object: self.node?.scene)
+    }
+    
+    if self.behaviour.didBeginContactWithNode? != nil {
+      center.addObserver(self, selector: "notificationDidBeginContactWithNode:", name: "notificationDidBeginContactWithNode", object: self.node)
+    }
+    if self.behaviour.didEndContactWithNode? != nil {
+      center.addObserver(self, selector: "notificationDidBeginContactWithNode:", name: "notificationDidEndContact", object: self.node)
+    }
+
+
   }
   
   final private func internalDidAddToNode() {
-    self.setupSubscribers()
     self.behaviour.didAddToNode?()
   }
-
+  final private func internalDidRemoveFromNode() {
+    self.cleanup()
+    self.behaviour.didRemoveNodeFromScene?()
+  }
   final private func internalDidAddNodeToScene() {
+    self.setupSubscribers()
     self.behaviour.didAddNodeToScene?()
+  }
+  final private func internalDidRemoveNodeFromScene() {
+    self.cleanup()
+    self.behaviour.didRemoveNodeFromScene?()
+  }
+  final private func cleanup() {
+    NSNotificationCenter.defaultCenter().removeObserver(self)
   }
   
   deinit {
-    NSNotificationCenter.defaultCenter().removeObserver(self)
+    self.cleanup()
   }
   
 }
@@ -86,7 +122,7 @@ extension SKNode {
       component.node = self
       component.isEnabled = true
       component.internalDidAddToNode()
-      if self.scene != nil { component.behaviour.didAddNodeToScene?() }
+      if self.scene != nil { component.internalDidAddNodeToScene() }
       return true
     }
     else { return false }
@@ -264,13 +300,14 @@ extension SKNode {
   
   final private func addedChild(node:SKNode) {
     if self is SKScene {
-      for component in node.components { component.didAddNodeToScene?() }
+      for component in node.components { component.internalDidAddNodeToScene() }
       for childNode in node.childNodes { node.addedChild(childNode) }
     }
     else if self.parent != nil {
-      for component in node.components { component.didAddNodeToScene?() }
+      for component in node.components { component.internalDidAddNodeToScene() }
       for childNode in node.childNodes { node.addedChild(childNode) }
     }
+    
   }
   
   
@@ -278,8 +315,8 @@ extension SKNode {
   final func internalAddChild(node:SKNode!) {
     if node.parent != self {
       node.removeFromParent()
-      self.internalAddChild(node)
       self.addedChild(node);
+      self.internalAddChild(node)
     }
     
   }
