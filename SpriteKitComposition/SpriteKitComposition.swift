@@ -3,41 +3,51 @@ import SpriteKit
 
 @objc private protocol ComponentBehaviour {
   optional func didAddToNode()
-  optional func didRemoveFromNode()
   optional func didAddNodeToScene()
+  optional func didRemoveFromNode()
   optional func didRemoveNodeFromScene()
 
-  //Cares about isEnabled
+  optional func didChangeSceneSizedFrom(previousSize:CGSize)
+  optional func didMoveToView(view: SKView)
+  optional func willMoveFromView(view: SKView)
+  optional func didChangeSize(oldSize: CGSize)
+
+  
+  //if isEnabled
   optional func didUpdate(time:NSTimeInterval)
   optional func didEvaluateActions()
   optional func didSimulatePhysics()
   optional func didApplyConstraints()
   optional func didFinishUpdate()
-
+  
   optional func didBeginContactWithNode(node:SKNode, contact:SKPhysicsContact)
   optional func didEndContactWithNode(node:SKNode, contact:SKPhysicsContact)
   
   optional func didBeginContact(contact:SKPhysicsContact)
   optional func didEndContact(contact:SKPhysicsContact)
-
+  
   optional func touchesBegan(touches: [UITouch], withEvent event: UIEvent)
-
-  //Doesn't care about isEnabled
-  optional func didChangeSceneSizedFrom(previousSize:CGSize)
-  optional func didMoveToView(view: SKView)
-  optional func willMoveFromView(view: SKView)
-  optional func didChangeSize(oldSize: CGSize)
+  
   
 }
 
-@objc public class Component : ComponentBehaviour {
-  var isEnabled:Bool = true
-  private(set) weak var node:SKNode?
+@objc public class Component :  ComponentBehaviour {
   private var behaviour:ComponentBehaviour { self as ComponentBehaviour }
-  init() {  }
+  var isEnabled:Bool = true
+  private(set) weak var node:SKNode? {
+    didSet {
+      if(self.node != nil) {
+        self.behaviour.didAddToNode?()
+        if(self.node?.scene != nil) { self.behaviour.didAddNodeToScene?() }
+      }
+    }
+  }
+
   
+  init() {
+  }
   
-  final private func setupSubscribers() {
+  final private func setupSubscribersAfterAddedToScene() {
     NSNotificationCenter.defaultCenter().removeObserver(self)
     let center = NSNotificationCenter.defaultCenter()
     
@@ -59,32 +69,33 @@ import SpriteKit
     if self.behaviour.didEndContact? != nil {
       center.addObserver(self, selector: "notificationDidEndContact:", name: "notificationDidEndContact", object: self.node?.scene)
     }
-    
     if self.behaviour.didBeginContactWithNode? != nil {
       center.addObserver(self, selector: "notificationDidBeginContactWithNode:", name: "notificationDidBeginContactWithNode", object: self.node)
     }
     if self.behaviour.didEndContactWithNode? != nil {
       center.addObserver(self, selector: "notificationDidBeginContactWithNode:", name: "notificationDidEndContact", object: self.node)
     }
-
-
+    
+    
+    
   }
   
-  final private func internalDidAddToNode() {
-    self.behaviour.didAddToNode?()
+  
+  final private func internalDidAddNodeToScene() {
+    self.setupSubscribersAfterAddedToScene()
+    self.behaviour.didAddNodeToScene?()
   }
+
   final private func internalDidRemoveFromNode() {
     self.cleanup()
     self.behaviour.didRemoveNodeFromScene?()
   }
-  final private func internalDidAddNodeToScene() {
-    self.setupSubscribers()
-    self.behaviour.didAddNodeToScene?()
-  }
+
   final private func internalDidRemoveNodeFromScene() {
     self.cleanup()
     self.behaviour.didRemoveNodeFromScene?()
   }
+  
   final private func cleanup() {
     NSNotificationCenter.defaultCenter().removeObserver(self)
   }
@@ -119,10 +130,8 @@ extension SKNode {
   final func addComponent<T:Component>(component:T, withKey key:String) -> Bool {
     if self.componentContainer.components[key] == nil {
       self.componentContainer.components[key] = component
-      component.node = self
       component.isEnabled = true
-      component.internalDidAddToNode()
-      if self.scene != nil { component.internalDidAddNodeToScene() }
+      component.node = self
       return true
     }
     else { return false }
@@ -180,7 +189,7 @@ extension SKScene : SKPhysicsContactDelegate {
   public func didEvaluateActions() {
     super.internalDidEvaluateActions()
   }
-
+  
   public func didSimulatePhysics() {
     super.internalDidSimulatePhysics()
   }
@@ -201,47 +210,38 @@ extension SKScene : SKPhysicsContactDelegate {
   public func didEndContact(contact: SKPhysicsContact) {
     super.internalDidEndContact(contact)
   }
-
+  
   
   public func didMoveToView(view: SKView) {
     self.physicsWorld.contactDelegate = self
   }
-
+  
   public func willMoveFromView(view: SKView) {
     
   }
   
-
-
+  
+  
 }
 
 extension SKNode {
   
   final private func internalUpdate(currentTime: NSTimeInterval) {
-    for component in self.components { if component.isEnabled { component.didUpdate?(currentTime) } }
-    for child in self.childNodes     { child.internalUpdate(currentTime) }
+    
   }
-
+  
   final private func internalDidEvaluateActions() {
-    for component in self.components { if component.isEnabled { component.didEvaluateActions?() } }
-    for child in self.childNodes     { child.internalDidEvaluateActions()  }
+    
   }
   
   final private func internalDidSimulatePhysics() {
-    for component in self.components { if component.isEnabled { component.didSimulatePhysics?() } }
-    for child in self.childNodes     { child.internalDidSimulatePhysics()  }
-  }
-  
-  /* Constraints
-  
-  */
-
-  final private func internalDidFinishUpdate() {
-    for component in self.components { if component.isEnabled  { component.didFinishUpdate?() } }
-    for child in self.childNodes     { child.internalDidFinishUpdate()  }
     
   }
-
+  
+  final private func internalDidFinishUpdate() {
+    
+  }
+  
   final private func tupleForContact(contact: SKPhysicsContact) -> (allComponents: [Component], allNodes: [SKNode]) {
     let nodeA = contact.bodyA.node
     let nodeB = contact.bodyB.node
@@ -253,9 +253,9 @@ extension SKNode {
     let allNodes = (nodeA?.childNodes ?? [SKNode]()) + (nodeB?.childNodes ?? [SKNode]())
     
     return (allComponents, allNodes)
-
+    
   }
-
+  
   final private func internalRecursiveDidBeginContact(contact: SKPhysicsContact) {
     for component in self.components { if component.isEnabled { component.didBeginContact?(contact) } }
     for child in self.childNodes     { child.internalRecursiveDidBeginContact(contact)  }
@@ -268,12 +268,12 @@ extension SKNode {
     for component in tupleForContact.allComponents  { if component.isEnabled { component.didBeginContact?(contact) } }
     for sprite    in tupleForContact.allNodes       { sprite.internalRecursiveDidBeginContact(contact) }
   }
-
+  
   final private func internalRecursiveDidEndContact(contact: SKPhysicsContact) {
     for component in self.components { if component.isEnabled { component.didEndContact?(contact) } }
     for child in self.childNodes     { child.internalRecursiveDidEndContact(contact)  }
   }
-
+  
   final private func internalDidEndContact(contact: SKPhysicsContact) {
     let tupleForContact = self.tupleForContact(contact)
     for component in self.components                { if component.isEnabled { component.didEndContact?(contact) } }
@@ -285,15 +285,15 @@ extension SKNode {
   
   final private func internalTouchesBegan(touches: [UITouch], withEvent event: UIEvent) {
     for component in self.components { if component.isEnabled { component.touchesBegan?(touches, withEvent: event) } }
-//    for child in self.childNodes     { child.internalTouchesBegan(touches, withEvent: event) }
+    //    for child in self.childNodes     { child.internalTouchesBegan(touches, withEvent: event) }
     
   }
   
-   override public func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+  override public func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
     let touchesList:[UITouch] = touches.allObjects as [UITouch]
     self.internalTouchesBegan(touchesList, withEvent: event)
   }
-
+  
 }
 
 extension SKNode {
@@ -303,7 +303,7 @@ extension SKNode {
       for component in node.components { component.internalDidAddNodeToScene() }
       for childNode in node.childNodes { node.addedChild(childNode) }
     }
-    else if self.parent != nil {
+    else if self.scene != nil {
       for component in node.components { component.internalDidAddNodeToScene() }
       for childNode in node.childNodes { node.addedChild(childNode) }
     }
@@ -312,19 +312,19 @@ extension SKNode {
   
   
   
-  final func internalAddChild(node:SKNode!) {
+  final func _addChild(node:SKNode!) {
     if node.parent != self {
       node.removeFromParent()
       self.addedChild(node);
-      self.internalAddChild(node)
+      self._addChild(node)
     }
     
   }
   
-  final func internalInsertChild(node: SKNode!, atIndex index: Int) {
+  final func _insertChild(node: SKNode!, atIndex index: Int) {
     if node.parent != self {
       node.removeFromParent()
-      self.internalInsertChild(node, atIndex: index)
+      self._insertChild(node, atIndex: index)
       self.addedChild(node);
     }
     
@@ -332,18 +332,18 @@ extension SKNode {
   
   final private func removedChild(node:SKNode) {
     if self is SKScene {
-      for component in node.components { component.didRemoveNodeFromScene?() }
+      for component in node.components { component.internalDidRemoveNodeFromScene() }
       for childNode in node.childNodes { node.removedChild(childNode) }
     }
     else if self.parent != nil {
-      for component in node.components { component.didRemoveNodeFromScene?() }
+      for component in node.components { component.internalDidRemoveNodeFromScene() }
       for childNode in node.childNodes { node.removedChild(childNode) }
     }
     
   }
   
   
-  final func internalRemoveChildrenInArray(nodes: [AnyObject]!) {
+  final func _removeChildrenInArray(nodes: [AnyObject]!) {
     var nodesAsSKNodes = nodes as [SKNode]
     var childNodesToRemove = [SKNode]()
     for child in self.childNodes {
@@ -352,17 +352,17 @@ extension SKNode {
         self.removedChild(child)
       }
     }
-    self.internalRemoveChildrenInArray(childNodesToRemove)
+    self._removeChildrenInArray(childNodesToRemove)
   }
   
-  final func internalRemoveAllChildren() {
+  final func _removeAllChildren() {
     for child in self.childNodes { self.removedChild(child) }
-    self.internalRemoveAllChildren()
+    self._removeAllChildren()
   }
   
-  final func internalRemoveFromParent() {
+  final func _removeFromParent() {
     self.parent?.removedChild(self)
-    self.internalRemoveFromParent()
+    self._removeFromParent()
     
   }
   
@@ -370,7 +370,7 @@ extension SKNode {
   
   final private var componentContainer:InternalComponentContainer {
     get {
-//      println(SharedComponentManager.sharedInstance.mapTable)
+      //      println(SharedComponentManager.sharedInstance.mapTable)
       var manager = SharedComponentManager.sharedInstance.mapTable.objectForKey(self) as InternalComponentContainer?
       if manager == nil {
         manager = InternalComponentContainer()
@@ -394,9 +394,9 @@ extension SKNode {
 final private class SharedComponentManager {
   let mapTable:NSMapTable = NSMapTable(keyOptions: NSPointerFunctionsOpaquePersonality|NSPointerFunctionsWeakMemory, valueOptions: NSPointerFunctionsStrongMemory)
   class var sharedInstance : SharedComponentManager {
-  struct Static {
-    static var onceToken : dispatch_once_t = 0
-    static var instance : SharedComponentManager? = nil
+    struct Static {
+      static var onceToken : dispatch_once_t = 0
+      static var instance : SharedComponentManager? = nil
     }
     dispatch_once(&Static.onceToken) {
       
@@ -410,11 +410,11 @@ final private class SharedComponentManager {
         if originalMethod != nil && swizzledMethod != nil { method_exchangeImplementations(originalMethod!, swizzledMethod!) }
         
       }
-      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "addChild:", withSelector:"internalAddChild:")
-      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "insertChild:atIndex:", withSelector:"internalInsertChild:atIndex:")
-      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeChildrenInArray:", withSelector:"internalRemoveChildrenInArray:")
-      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeAllChildren", withSelector:"internalRemoveAllChildren")
-      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeFromParent", withSelector:"internalRemoveFromParent")
+      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "addChild:", withSelector:"_addChild:")
+      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "insertChild:atIndex:", withSelector:"_insertChild:atIndex:")
+      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeChildrenInArray:", withSelector:"_removeChildrenInArray:")
+      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeAllChildren", withSelector:"_removeAllChildren")
+      swizzleExchangeMethodsOnClass(SKNode.self, replaceSelector: "removeFromParent", withSelector:"_removeFromParent")
       
       Static.instance = SharedComponentManager()
       
