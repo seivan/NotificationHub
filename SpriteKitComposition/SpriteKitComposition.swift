@@ -293,7 +293,7 @@ extension SKNode {
 
 extension SKNode {
   
-  final private func _addedChild(node:SKNode) {
+  private func _addedChild(node:SKNode) {
     if self is SKScene {
       for component in node.components { component._didAddNodeToScene() }
       for childNode in node.childNodes { node._addedChild(childNode) }
@@ -307,7 +307,7 @@ extension SKNode {
   
   
   
-  final func _addChild(node:SKNode!) {
+   func _addChild(node:SKNode!) {
     if node.parent != self {
       node.removeFromParent()
       self._addedChild(node);
@@ -316,7 +316,7 @@ extension SKNode {
     
   }
   
-  final func _insertChild(node: SKNode!, atIndex index: Int) {
+   func _insertChild(node: SKNode!, atIndex index: Int) {
     if node.parent != self {
       node.removeFromParent()
       self._insertChild(node, atIndex: index)
@@ -325,7 +325,7 @@ extension SKNode {
     
   }
   
-  final private func _removedChild(node:SKNode) {
+  private func _removedChild(node:SKNode) {
     if self is SKScene {
       for component in node.components { component._didRemoveNodeFromScene() }
       for childNode in node.childNodes { node._removedChild(childNode) }
@@ -338,7 +338,7 @@ extension SKNode {
   }
   
   
-  final func _removeChildrenInArray(nodes: [AnyObject]!) {
+  func _removeChildrenInArray(nodes: [AnyObject]!) {
     var nodesAsSKNodes = nodes as [SKNode]
     var childNodesToRemove = [SKNode]()
     for child in self.childNodes {
@@ -350,12 +350,12 @@ extension SKNode {
     self._removeChildrenInArray(childNodesToRemove)
   }
   
-  final func _removeAllChildren() {
+  func _removeAllChildren() {
     for child in self.childNodes { self._removedChild(child) }
     self._removeAllChildren()
   }
   
-  final func _removeFromParent() {
+  func _removeFromParent() {
     self.parent?._removedChild(self)
     self._removeFromParent()
     

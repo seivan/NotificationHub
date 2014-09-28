@@ -199,15 +199,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     player.addChild(gun)
 
     
-    enemy.addComponent(Reseting())
-    player.addComponent(Pinned())
-
-    
-    scene.addComponent(GravityLessBounds())
+//    enemy.addComponent(Reseting())
+//    player.addComponent(Pinned())
+//
+//    
+//    scene.addComponent(GravityLessBounds())
     scene.addComponent(SceneDebugger())
     
-    scene.addComponent(Toucher())
-    player.addComponent(Toucher())
+//    scene.addComponent(Toucher())
+//    player.addComponent(Toucher())
 
     scene.addChild(enemy)
     scene.addChild(player)
