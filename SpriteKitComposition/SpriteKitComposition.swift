@@ -4,6 +4,7 @@ import SpriteKit
 @objc private protocol ComponentBehaviour {
   optional func didAddToNode()
   optional func didAddNodeToScene()
+  
   optional func didRemoveFromNode()
   optional func didRemoveNodeFromScene()
 
@@ -31,81 +32,118 @@ import SpriteKit
   
 }
 
-@objc public class Component :  ComponentBehaviour {
+@objc public class Component : ComponentBehaviour  {
+  var observers:[NSObjectProtocol] = [NSObjectProtocol]()
   private var behaviour:ComponentBehaviour { self as ComponentBehaviour }
   var isEnabled:Bool = true
   private(set) weak var node:SKNode? {
     didSet {
       if(self.node != nil) {
-        self.behaviour.didAddToNode?()
-        if(self.node?.scene != nil) { self.behaviour.didAddNodeToScene?() }
+        self.isEnabled = true
+        self._didAddToNode()
+      }
+      else {
+        self.isEnabled = false
+        self._didRemoveFromNode()
       }
     }
   }
 
-  
-  init() {
+  final private func addObserver(predicate:@autoclosure () -> Bool, name:String, _ node:SKNode?, callback:(NSNotification) -> Void) {
+    if(predicate()) {
+      self.observers.append(NSNotificationCenter.defaultCenter().addObserverForName(name, object:node, queue: nil) { notification in
+        callback(notification)
+        })
+    }
   }
   
-  final private func setupSubscribersAfterAddedToScene() {
-    NSNotificationCenter.defaultCenter().removeObserver(self)
+
+
+  final private func addObservers() {
+    self.removeObservers()
     let center = NSNotificationCenter.defaultCenter()
-    
-    if self.behaviour.didUpdate? != nil {
-      center.addObserver(self, selector: "notificationDidUpdate:", name: "notificationDidUpdate", object: self.node?.scene)
-    }
-    if self.behaviour.didEvaluateActions? != nil {
-      center.addObserver(self, selector: "notificationDidEvaluateActions:", name: "notificationDidEvaluateActions", object: self.node?.scene)
-    }
-    if self.behaviour.didSimulatePhysics? != nil {
-      center.addObserver(self, selector: "notificationDidSimulatePhysics:", name: "notificationDidSimulatePhysics", object: self.node?.scene)
-    }
-    if self.behaviour.didFinishUpdate? != nil {
-      center.addObserver(self, selector: "notificationDidFinishUpdate:", name: "notificationDidFinishUpdate", object: self.node?.scene)
-    }
-    if self.behaviour.didBeginContact? != nil {
-      center.addObserver(self, selector: "notificationDidBeginContact:", name: "notificationDidBeginContact", object: self.node?.scene)
-    }
-    if self.behaviour.didEndContact? != nil {
-      center.addObserver(self, selector: "notificationDidEndContact:", name: "notificationDidEndContact", object: self.node?.scene)
-    }
-    if self.behaviour.didBeginContactWithNode? != nil {
-      center.addObserver(self, selector: "notificationDidBeginContactWithNode:", name: "notificationDidBeginContactWithNode", object: self.node)
-    }
-    if self.behaviour.didEndContactWithNode? != nil {
-      center.addObserver(self, selector: "notificationDidBeginContactWithNode:", name: "notificationDidEndContact", object: self.node)
+    let b = self.behaviour
+    self.addObserver(b.didAddToNode? != nil, name: "didUpdate", self.node?.scene) { [weak self] notification in
+      if let x = self { if x.isEnabled { x.behaviour.didUpdate?((notification.userInfo as [String:CFTimeInterval])["currentTime"]!) } }
     }
     
+    self.addObserver(b.didEvaluateActions? != nil, name: "didEvaluateActions", self.node?.scene) { [weak self] notification in
+      if let x = self { if x.isEnabled { println(notification)  } }
+    }
+
+    self.addObserver(b.didSimulatePhysics? != nil, name: "didSimulatePhysics", self.node?.scene) { [weak self] notification in
+      if let x = self { if x.isEnabled { println(notification)  } }
+    }
+
+    self.addObserver(b.didApplyConstraints? != nil, name: "didApplyConstraints", self.node?.scene) { [weak self] notification in
+      if let x = self { if x.isEnabled { println(notification)  } }
+    }
+
+    self.addObserver(b.didFinishUpdate? != nil, name: "didFinishUpdate", self.node?.scene) { [weak self] notification in
+      if let x = self { if x.isEnabled { println(notification)  } }
+    }
+
+    self.addObserver(b.didBeginContact? != nil, name: "didBeginContact", self.node?.scene) { [weak self] notification in
+      if let x = self { if x.isEnabled { x.behaviour.didBeginContact?((notification.userInfo as [String:SKPhysicsContact])["contact"]!) } }
+    }
+
+    self.addObserver(b.didEndContact? != nil, name: "didEndContact", self.node?.scene) { [weak self] notification in
+      if let x = self { if x.isEnabled { x.behaviour.didEndContact?((notification.userInfo as [String:SKPhysicsContact])["contact"]!) } }
+    }
+
+    self.addObserver(b.didBeginContactWithNode? != nil, name: "didBeginContactWithNode", self.node) { [weak self] notification in
+      if let x = self { if x.isEnabled {
+        let contact = notification.userInfo!["contact"] as SKPhysicsContact
+        let node    = notification.userInfo!["node"] as SKNode
+        x.behaviour.didBeginContactWithNode?(node, contact: contact)
+        }
+      }
+    }
+    
+    self.addObserver(b.didEndContactWithNode? != nil, name: "didEndContactWithNode", self.node) { [weak self] notification in
+      if let x = self { if x.isEnabled {
+        let contact = notification.userInfo!["contact"] as SKPhysicsContact
+        let node    = notification.userInfo!["node"] as SKNode
+        x.behaviour.didEndContactWithNode?(node, contact: contact)
+        }
+      }
+
+    }
     
     
   }
   
   
-  final private func internalDidAddNodeToScene() {
-    self.setupSubscribersAfterAddedToScene()
+  final private func _didAddToNode() {
+    self.behaviour.didAddToNode?()
+    if(self.node?.scene != nil) { self._didAddNodeToScene() }
+
+  }
+  final private func _didAddNodeToScene() {
+    self.addObservers()
     self.behaviour.didAddNodeToScene?()
   }
 
-  final private func internalDidRemoveFromNode() {
-    self.cleanup()
+  final private func _didRemoveFromNode() {
+    self.removeObservers()
     self.behaviour.didRemoveNodeFromScene?()
   }
 
-  final private func internalDidRemoveNodeFromScene() {
-    self.cleanup()
+  final private func _didRemoveNodeFromScene() {
+    self.removeObservers()
     self.behaviour.didRemoveNodeFromScene?()
   }
   
-  final private func cleanup() {
-    NSNotificationCenter.defaultCenter().removeObserver(self)
+  final private func removeObservers() {
+    let center = NSNotificationCenter.defaultCenter()
+    for observer in self.observers { center.removeObserver(observer) }
   }
   
   deinit {
-    self.cleanup()
+    self.removeObservers()
   }
   
 }
-
 
 
 
@@ -130,7 +168,6 @@ extension SKNode {
   final func addComponent<T:Component>(component:T, withKey key:String) -> Bool {
     if self.componentContainer.components[key] == nil {
       self.componentContainer.components[key] = component
-      component.isEnabled = true
       component.node = self
       return true
     }
@@ -150,9 +187,7 @@ extension SKNode {
   
   final func removeComponentWithKey(key:String) -> Bool {
     if let componentToRemove = self.componentContainer.components.removeValueForKey(key) {
-      componentToRemove.isEnabled = false
-      componentToRemove.behaviour.didRemoveFromNode?()
-      
+      componentToRemove.node = nil
       return true
     }
     else { return false }
@@ -183,15 +218,15 @@ extension SKScene : SKPhysicsContactDelegate {
       timeSinceLast = 1.0 / 60.0
       container.lastUpdateTimeInterval = currentTime
     }
-    super.internalUpdate(timeSinceLast)
+    NSNotificationCenter.defaultCenter().postNotificationName("didUpdate", object: self, userInfo: ["currentTime" : timeSinceLast])
   }
   
   public func didEvaluateActions() {
-    super.internalDidEvaluateActions()
+    NSNotificationCenter.defaultCenter().postNotificationName("didEvaluateActions", object: self)
   }
   
   public func didSimulatePhysics() {
-    super.internalDidSimulatePhysics()
+    NSNotificationCenter.defaultCenter().postNotificationName("didSimulatePhysics", object: self)
   }
   
   /* Constraints
@@ -199,16 +234,30 @@ extension SKScene : SKPhysicsContactDelegate {
   */
   
   public func didFinishUpdate() {
-    super.internalDidFinishUpdate()
+    NSNotificationCenter.defaultCenter().postNotificationName("didFinishUpdate", object: self)
   }
   
   
   public func didBeginContact(contact: SKPhysicsContact) {
-    super.internalDidBeginContact(contact)
+    NSNotificationCenter.defaultCenter().postNotificationName("didBeginContact", object: self, userInfo: ["contact" : contact])
+    let nodeA = contact.bodyA.node!
+    let nodeB = contact.bodyB.node!
+    NSNotificationCenter.defaultCenter().postNotificationName("didBeginContactWithNode", object: nodeA,
+      userInfo: ["contact" : contact, "node" : nodeB])
+    NSNotificationCenter.defaultCenter().postNotificationName("didBeginContactWithNode", object: nodeB,
+      userInfo: ["contact" : contact, "node" : nodeA])
+
   }
   
   public func didEndContact(contact: SKPhysicsContact) {
-    super.internalDidEndContact(contact)
+    NSNotificationCenter.defaultCenter().postNotificationName("didEndContact", object: self,
+      userInfo: ["contact" : contact])
+    let nodeA = contact.bodyA.node!
+    let nodeB = contact.bodyB.node!
+    NSNotificationCenter.defaultCenter().postNotificationName("didEndContactWithNode", object: nodeA,
+      userInfo: ["contact" : contact, "node" : nodeB])
+    NSNotificationCenter.defaultCenter().postNotificationName("didEndContactWithNode", object: nodeB,
+      userInfo: ["contact" : contact, "node" : nodeA])
   }
   
   
@@ -226,86 +275,31 @@ extension SKScene : SKPhysicsContactDelegate {
 
 extension SKNode {
   
-  final private func internalUpdate(currentTime: NSTimeInterval) {
-    
-  }
-  
-  final private func internalDidEvaluateActions() {
-    
-  }
-  
-  final private func internalDidSimulatePhysics() {
-    
-  }
-  
-  final private func internalDidFinishUpdate() {
-    
-  }
-  
-  final private func tupleForContact(contact: SKPhysicsContact) -> (allComponents: [Component], allNodes: [SKNode]) {
-    let nodeA = contact.bodyA.node
-    let nodeB = contact.bodyB.node
-    
-    let componentsA = nodeA?.components ?? [Component]()
-    let componentsB = nodeB?.components ?? [Component]()
-    
-    let allComponents = componentsA + componentsB
-    let allNodes = (nodeA?.childNodes ?? [SKNode]()) + (nodeB?.childNodes ?? [SKNode]())
-    
-    return (allComponents, allNodes)
-    
-  }
-  
-  final private func internalRecursiveDidBeginContact(contact: SKPhysicsContact) {
-    for component in self.components { if component.isEnabled { component.didBeginContact?(contact) } }
-    for child in self.childNodes     { child.internalRecursiveDidBeginContact(contact)  }
-  }
-  
-  
-  final private func internalDidBeginContact(contact: SKPhysicsContact) {
-    let tupleForContact = self.tupleForContact(contact)
-    for component in self.components                { if component.isEnabled { component.didBeginContact?(contact) } }
-    for component in tupleForContact.allComponents  { if component.isEnabled { component.didBeginContact?(contact) } }
-    for sprite    in tupleForContact.allNodes       { sprite.internalRecursiveDidBeginContact(contact) }
-  }
-  
-  final private func internalRecursiveDidEndContact(contact: SKPhysicsContact) {
-    for component in self.components { if component.isEnabled { component.didEndContact?(contact) } }
-    for child in self.childNodes     { child.internalRecursiveDidEndContact(contact)  }
-  }
-  
-  final private func internalDidEndContact(contact: SKPhysicsContact) {
-    let tupleForContact = self.tupleForContact(contact)
-    for component in self.components                { if component.isEnabled { component.didEndContact?(contact) } }
-    for component in tupleForContact.allComponents  { if component.isEnabled { component.didEndContact?(contact) } }
-    for sprite    in tupleForContact.allNodes       { sprite.internalRecursiveDidEndContact(contact) }
-    
-  }
-  
-  
-  final private func internalTouchesBegan(touches: [UITouch], withEvent event: UIEvent) {
-    for component in self.components { if component.isEnabled { component.touchesBegan?(touches, withEvent: event) } }
-    //    for child in self.childNodes     { child.internalTouchesBegan(touches, withEvent: event) }
-    
-  }
-  
-  override public func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
-    let touchesList:[UITouch] = touches.allObjects as [UITouch]
-    self.internalTouchesBegan(touchesList, withEvent: event)
-  }
+//  
+//  
+//  final private func internalTouchesBegan(touches: [UITouch], withEvent event: UIEvent) {
+//    for component in self.components { if component.isEnabled { component.touchesBegan?(touches, withEvent: event) } }
+//    //    for child in self.childNodes     { child.internalTouchesBegan(touches, withEvent: event) }
+//    
+//  }
+//  
+//  override public func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+//    let touchesList:[UITouch] = touches.allObjects as [UITouch]
+//    self.internalTouchesBegan(touchesList, withEvent: event)
+//  }
   
 }
 
 extension SKNode {
   
-  final private func addedChild(node:SKNode) {
+  final private func _addedChild(node:SKNode) {
     if self is SKScene {
       for component in node.components { component.internalDidAddNodeToScene() }
-      for childNode in node.childNodes { node.addedChild(childNode) }
+      for childNode in node.childNodes { node._addedChild(childNode) }
     }
     else if self.scene != nil {
       for component in node.components { component.internalDidAddNodeToScene() }
-      for childNode in node.childNodes { node.addedChild(childNode) }
+      for childNode in node.childNodes { node._addedChild(childNode) }
     }
     
   }
@@ -315,7 +309,7 @@ extension SKNode {
   final func _addChild(node:SKNode!) {
     if node.parent != self {
       node.removeFromParent()
-      self.addedChild(node);
+      self._addedChild(node);
       self._addChild(node)
     }
     
@@ -325,7 +319,7 @@ extension SKNode {
     if node.parent != self {
       node.removeFromParent()
       self._insertChild(node, atIndex: index)
-      self.addedChild(node);
+      self._addedChild(node);
     }
     
   }
