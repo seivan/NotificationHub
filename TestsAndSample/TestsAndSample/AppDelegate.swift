@@ -10,151 +10,6 @@ import UIKit
 import SpriteKit
 
 
-class Player : SKSpriteNode {
-
-
-  override init(texture: SKTexture!, color: UIColor!, size: CGSize) {
-    super.init(texture:texture, color:color, size:size)
-  }
-  
-  init(color: UIColor!, size: CGSize) {
-    super.init()
-    self.color = color
-    self.size = size
-  }
-  
-
-  required init(coder aDecoder: NSCoder) {
-    super.init(coder: aDecoder)
-      fatalError("init(coder:) has not been implemented")
-  }
-  
-  func didEndContact(contact: SKPhysicsContact) {
-    println("DID END CONTACT")
-  }
-  
-}
-
-//color: UIColor.blueColor(), size: CGSize(width: 40, height: 40))
-
-class Toucher : Component {
-
-  func didAddToNode() {
-    self.node?.userInteractionEnabled = true
-  }
-
-  func touchesBegan(touches: [UITouch], withEvent event: UIEvent) {
-    println("TOUCH \(self.node?.name)")
-  }
-}
-
-class MyScene : SKScene {
-  override func update(currentTime: NSTimeInterval) {
-    super.update(currentTime)
-  }
-  override func didEvaluateActions() {
-    super.didEvaluateActions()
-  }
-  override func didSimulatePhysics() {
-    super.didSimulatePhysics()
-  }
-  override func didFinishUpdate() {
-    super.didSimulatePhysics()
-  }
-  override func didEndContact(contact: SKPhysicsContact) {
-    super.didEndContact(contact)
-  }
-
- 
-}
-
-class SceneDebugger : Component {
-  func didAddToNode() {
-    let skView = (self.node as SKScene).view
-    skView?.showsFPS = true
-    skView?.showsNodeCount = true
-    skView?.showsDrawCount = true
-    skView?.showsQuadCount = true
-    skView?.showsPhysics = true
-    skView?.showsFields = true
-    skView?.setValue(NSNumber(bool: true), forKey: "_showsCulledNodesInNodeCount")
-//    skView?.multipleTouchEnabled = true
-  }
-}
-
-class GravityLessBounds : Component {
-  func didAddToNode() {
-    let scene = (self.node as SKScene)
-    scene.physicsWorld.gravity = CGVector(0,0)
-    scene.physicsBody = SKPhysicsBody(edgeLoopFromRect: scene.frame)
-  }
-  
-}
-
-enum Contact : UInt32 {
-  case Pinned
-  case Moving
-}
-
-class Physical : Component {
-  func didAddToNode() {
-    self.node?.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 40, height: 40))
-  }
-  
-}
-
-class Pinned : Component {
-//   override func didAddToNode() {
-   func didAddToNode() {
-//    super.didAddToNode()
-    self.node?.physicsBody = nil
-    self.node?.position = CGPoint(x: 200, y: 200)
-    self.node?.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 40, height: 40))
-    self.node?.physicsBody?.categoryBitMask = Contact.Pinned.rawValue
-    self.node?.physicsBody?.contactTestBitMask = Contact.Moving.rawValue
-    self.node?.physicsBody?.collisionBitMask = Contact.Moving.rawValue
-    self.node?.physicsBody?.pinned = true
-
-  }
-  
-  func didEndContact(contact:SKPhysicsContact) {
-    self.node?.removeComponentWithClass(Pinned.self)
-    self.node?.addComponent(Pinned())
-    
-  }
-
-}
-
-
-class Reseting : Component {
-
-  func didAddToNode() {
-    self.node?.physicsBody = nil
-    self.node?.position = CGPoint(x: 100, y: 100)
-    self.node?.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 40, height: 40))
-    self.node?.physicsBody?.categoryBitMask = Contact.Moving.rawValue
-    self.node?.physicsBody?.contactTestBitMask = Contact.Pinned.rawValue
-    self.node?.physicsBody?.collisionBitMask = Contact.Pinned.rawValue
-    self.node?.physicsBody?.dynamic = true
-    self.node?.physicsBody?.pinned = false
-  }
-  
-  func didAddNodeToScene() {
-   self.node?.physicsBody?.applyImpulse(CGVector(15.0,15.0))
-  }
-  
-  func didEndContact(contact:SKPhysicsContact) {
-    let node = self.node
-    self.node?.removeComponent(self)
-    node?.addComponent(Reseting())
-
-  }
-
-
-}
-
-
-
 
 
 @UIApplicationMain
@@ -171,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let controller = UIViewController()
     controller.view = SKView(frame: controller.view.frame)
     // Configure the view.
-    let scene = MyScene(size: controller.view.frame.size)
+    let scene = SKScene(size: controller.view.frame.size)
     let skView = controller.view as SKView
     /* Sprite Kit applies additional optimizations to improve rendering performance */
     skView.ignoresSiblingOrder = true
@@ -187,11 +42,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     
 
-    let enemy = Player(color: UIColor.redColor(), size: CGSize(width: 40, height: 40))
+    let enemy = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: 40, height: 40))
     enemy.name = "ENEMY"
     
     
-    let player = Player(color: UIColor.blueColor(), size:  CGSize(width: 40, height: 40))
+    let player = SKSpriteNode(color: UIColor.blueColor(), size:  CGSize(width: 40, height: 40))
     player.name = "PLAYER"
 
 
@@ -203,15 +58,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     player.addChild(gun)
 
     
-    enemy.addComponent(Reseting())
-    player.addComponent(Pinned())
 
-    
-    scene.addComponent(GravityLessBounds())
-    scene.addComponent(SceneDebugger())
-    
-    scene.addComponent(Toucher())
-    player.addComponent(Toucher())
 
     scene.addChild(enemy)
     scene.addChild(player)

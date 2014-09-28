@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2201CDFE19AA68FE00F4BCED /* SpriteKitComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2201CDFD19AA68FE00F4BCED /* SpriteKitComposition.swift */; };
+		225F742719D8BEDF007F31C5 /* NotificationHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225F742619D8BEDF007F31C5 /* NotificationHub.swift */; };
+		225F742819D8BEDF007F31C5 /* NotificationHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225F742619D8BEDF007F31C5 /* NotificationHub.swift */; };
 		22A84F2219C7461100020B69 /* SpriteKitCompositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A84F2119C7461100020B69 /* SpriteKitCompositionTests.swift */; };
 		22AFC47F195F9D02003572F3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22AFC47E195F9D02003572F3 /* AppDelegate.swift */; };
 		22AFC481195F9D02003572F3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 22AFC480195F9D02003572F3 /* Images.xcassets */; };
@@ -31,7 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2201CDFD19AA68FE00F4BCED /* SpriteKitComposition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpriteKitComposition.swift; sourceTree = "<group>"; };
+		225F742619D8BEDF007F31C5 /* NotificationHub.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationHub.swift; sourceTree = "<group>"; };
 		22A84F2019C7461100020B69 /* Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Bridging-Header.h"; sourceTree = "<group>"; };
 		22A84F2119C7461100020B69 /* SpriteKitCompositionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpriteKitCompositionTests.swift; sourceTree = "<group>"; };
 		22AFC479195F9D02003572F3 /* Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -60,19 +61,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2201CDFC19AA68FE00F4BCED /* SpriteKitComposition */ = {
+		225F742519D8BEDF007F31C5 /* NotificationHub */ = {
 			isa = PBXGroup;
 			children = (
-				2201CDFD19AA68FE00F4BCED /* SpriteKitComposition.swift */,
+				225F742619D8BEDF007F31C5 /* NotificationHub.swift */,
 			);
-			name = SpriteKitComposition;
-			path = ../SpriteKitComposition;
+			name = NotificationHub;
+			path = ../NotificationHub;
 			sourceTree = "<group>";
 		};
 		22AFC470195F9D02003572F3 = {
 			isa = PBXGroup;
 			children = (
-				2201CDFC19AA68FE00F4BCED /* SpriteKitComposition */,
+				225F742519D8BEDF007F31C5 /* NotificationHub */,
 				22AFC47B195F9D02003572F3 /* TestsAndSample */,
 				22AFC489195F9D02003572F3 /* TestsAndSampleTests */,
 				22AFC47A195F9D02003572F3 /* Products */,
@@ -222,7 +223,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2201CDFE19AA68FE00F4BCED /* SpriteKitComposition.swift in Sources */,
+				225F742719D8BEDF007F31C5 /* NotificationHub.swift in Sources */,
 				22AFC47F195F9D02003572F3 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -231,6 +232,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				225F742819D8BEDF007F31C5 /* NotificationHub.swift in Sources */,
 				22A84F2219C7461100020B69 /* SpriteKitCompositionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
