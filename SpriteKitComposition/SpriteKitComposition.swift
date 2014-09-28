@@ -1,8 +1,5 @@
 import SpriteKit
 
-class PKPhysicsContact : SKPhysicsContact {
-  
-}
 @objc private protocol ComponentBehaviour {
   optional func didAddToNode()
   optional func didAddNodeToScene()
@@ -66,43 +63,42 @@ class PKPhysicsContact : SKPhysicsContact {
     self.removeObservers()
     let center = NSNotificationCenter.defaultCenter()
     let b = self.behaviour
-    self.addObserver(b.didAddToNode? != nil, name: "didUpdate", self.node?.scene) { [weak self] notification in
+    self.addObserver(b.didAddToNode? != nil, name: "SKC_didUpdate", self.node?.scene) { [weak self] notification in
       if let x = self { if x.isEnabled { x.behaviour.didUpdate?((notification.userInfo as [String:CFTimeInterval])["currentTime"]!) } }
     }
     
-    self.addObserver(b.didEvaluateActions? != nil, name: "didEvaluateActions", self.node?.scene) { [weak self] notification in
+    self.addObserver(b.didEvaluateActions? != nil, name: "SKC_didEvaluateActions", self.node?.scene) { [weak self] notification in
       if let x = self { if x.isEnabled { println(notification)  } }
     }
 
-    self.addObserver(b.didSimulatePhysics? != nil, name: "didSimulatePhysics", self.node?.scene) { [weak self] notification in
+    self.addObserver(b.didSimulatePhysics? != nil, name: "SKC_didSimulatePhysics", self.node?.scene) { [weak self] notification in
       if let x = self { if x.isEnabled { println(notification)  } }
     }
 
-    self.addObserver(b.didApplyConstraints? != nil, name: "didApplyConstraints", self.node?.scene) { [weak self] notification in
+    self.addObserver(b.didApplyConstraints? != nil, name: "SKC_didApplyConstraints", self.node?.scene) { [weak self] notification in
       if let x = self { if x.isEnabled { println(notification)  } }
     }
 
-    self.addObserver(b.didFinishUpdate? != nil, name: "didFinishUpdate", self.node?.scene) { [weak self] notification in
+    self.addObserver(b.didFinishUpdate? != nil, name: "SKC_didFinishUpdate", self.node?.scene) { [weak self] notification in
       if let x = self { if x.isEnabled { println(notification)  } }
     }
 
-    self.addObserver(b.didBeginContact? != nil, name: "didBeginContact", self.node?.scene) { [weak self] notification in
+    self.addObserver(b.didBeginContact? != nil, name: "SKC_didBeginContact", self.node?.scene) { [weak self] notification in
       if let x = self { if x.isEnabled { x.behaviour.didBeginContact?((notification.userInfo as [String:SKPhysicsContact])["contact"]!) } }
     }
 
-    self.addObserver(b.didEndContact? != nil, name: "didEndContact", self.node?.scene) { [weak self] notification in
+    self.addObserver(b.didEndContact? != nil, name: "SKC_didEndContact", self.node?.scene) { [weak self] notification in
       if let x = self { if x.isEnabled {
-        let contact = notification.userInfo!["contact"]!
-        let p = contact as PKPhysicsContact
-        println(p)
-
+        let contact = notification.userInfo!["contact"]! as PKPhysicsContact
+        println(contact)
+        x.behaviour.didEndContact?(contact)
         
         
         }
       }
     }
 
-    self.addObserver(b.didBeginContactWithNode? != nil, name: "didBeginContactWithNode", self.node) { [weak self] notification in
+    self.addObserver(b.didBeginContactWithNode? != nil, name: "SKC_didBeginContactWithNode", self.node) { [weak self] notification in
       if let x = self { if x.isEnabled {
         let contact = notification.userInfo!["contact"] as SKPhysicsContact
         let node    = notification.userInfo!["node"] as SKNode
@@ -111,7 +107,7 @@ class PKPhysicsContact : SKPhysicsContact {
       }
     }
     
-    self.addObserver(b.didEndContactWithNode? != nil, name: "didEndContactWithNode", self.node) { [weak self] notification in
+    self.addObserver(b.didEndContactWithNode? != nil, name: "SKC_didEndContactWithNode", self.node) { [weak self] notification in
       if let x = self { if x.isEnabled {
         let contact = notification.userInfo!["contact"] as SKPhysicsContact
         let node    = notification.userInfo!["node"] as SKNode
@@ -229,15 +225,15 @@ extension SKScene : SKPhysicsContactDelegate {
       timeSinceLast = 1.0 / 60.0
       container.lastUpdateTimeInterval = currentTime
     }
-    NSNotificationCenter.defaultCenter().postNotificationName("didUpdate", object: self, userInfo: ["currentTime" : timeSinceLast])
+    NSNotificationCenter.defaultCenter().postNotificationName("SKC_didUpdate", object: self, userInfo: ["currentTime" : timeSinceLast])
   }
   
   public func didEvaluateActions() {
-    NSNotificationCenter.defaultCenter().postNotificationName("didEvaluateActions", object: self)
+    NSNotificationCenter.defaultCenter().postNotificationName("SKC_didEvaluateActions", object: self)
   }
   
   public func didSimulatePhysics() {
-    NSNotificationCenter.defaultCenter().postNotificationName("didSimulatePhysics", object: self)
+    NSNotificationCenter.defaultCenter().postNotificationName("SKC_didSimulatePhysics", object: self)
   }
   
   /* Constraints
@@ -245,34 +241,31 @@ extension SKScene : SKPhysicsContactDelegate {
   */
   
   public func didFinishUpdate() {
-    NSNotificationCenter.defaultCenter().postNotificationName("didFinishUpdate", object: self)
+    NSNotificationCenter.defaultCenter().postNotificationName("SKC_didFinishUpdate", object: self)
   }
   
   
   public func didBeginContact(contact: SKPhysicsContact) {
-    NSNotificationCenter.defaultCenter().postNotificationName("didBeginContact", object: self, userInfo: ["contact" : contact])
+    NSNotificationCenter.defaultCenter().postNotificationName("SKC_didBeginContact", object: self, userInfo: ["contact" : contact])
     let nodeA = contact.bodyA.node!
     let nodeB = contact.bodyB.node!
-    NSNotificationCenter.defaultCenter().postNotificationName("didBeginContactWithNode", object: nodeA,
+    NSNotificationCenter.defaultCenter().postNotificationName("SKC_didBeginContactWithNode", object: nodeA,
       userInfo: ["contact" : contact, "node" : nodeB])
-    NSNotificationCenter.defaultCenter().postNotificationName("didBeginContactWithNode", object: nodeB,
+    NSNotificationCenter.defaultCenter().postNotificationName("SKC_didBeginContactWithNode", object: nodeB,
       userInfo: ["contact" : contact, "node" : nodeA])
 
   }
   
   public func didEndContact(contact: SKPhysicsContact) {
-    println(contact)
-    println("LOL")
-    let v = NSValue(nonretainedObject: contact)
-    let q = ["contact" : v]
-    NSNotificationCenter.defaultCenter().postNotificationName("didEndContact", object: self,
-      userInfo: q)
+
+    NSNotificationCenter.defaultCenter().postNotificationName("SKC_didEndContact", object: self,
+      userInfo: ["contact" : contact])
     
     let nodeA = contact.bodyA.node!
     let nodeB = contact.bodyB.node!
-    NSNotificationCenter.defaultCenter().postNotificationName("didEndContactWithNode", object: nodeA,
+    NSNotificationCenter.defaultCenter().postNotificationName("SKC_didEndContactWithNode", object: nodeA,
       userInfo: ["contact" : contact, "node" : nodeB])
-    NSNotificationCenter.defaultCenter().postNotificationName("didEndContactWithNode", object: nodeB,
+    NSNotificationCenter.defaultCenter().postNotificationName("SKC_didEndContactWithNode", object: nodeB,
       userInfo: ["contact" : contact, "node" : nodeA])
   }
   
