@@ -251,8 +251,8 @@ extension SKScene : SKPhysicsContactDelegate {
     NSNotificationCenter.defaultCenter().postNotificationName(name, object: self,
       userInfo: userInfo)
     
-    let nodeA = contact.bodyA.node!
-    let nodeB = contact.bodyB.node!
+    let nodeA = contact.bodyA.node
+    let nodeB = contact.bodyB.node
     
     userInfo["node"] = nodeB
     let withNodeName = name + "WithNode"

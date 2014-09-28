@@ -113,6 +113,7 @@ class Pinned : Component {
     self.node?.physicsBody?.categoryBitMask = Contact.Pinned.rawValue
     self.node?.physicsBody?.contactTestBitMask = Contact.Moving.rawValue
     self.node?.physicsBody?.collisionBitMask = Contact.Moving.rawValue
+    self.node?.physicsBody?.pinned = true
 
   }
   
@@ -139,18 +140,13 @@ class Reseting : Component {
   }
   
   func didAddNodeToScene() {
-//    let delay = 0 * Double(NSEC_PER_SEC)
-//    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
-//    dispatch_after(time, dispatch_get_main_queue()) {
-//      println("FUCK")
-      self.node?.physicsBody?.applyImpulse(CGVector(15.0,15.0))
-//    }
-    
+   self.node?.physicsBody?.applyImpulse(CGVector(15.0,15.0))
   }
   
   func didEndContact(contact:SKPhysicsContact) {
+    let node = self.node
     self.node?.removeComponent(self)
-    self.node?.addComponent(Reseting())
+    node?.addComponent(Reseting())
 
   }
 
