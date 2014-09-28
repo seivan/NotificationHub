@@ -38,8 +38,6 @@ class Player : SKSpriteNode {
 //color: UIColor.blueColor(), size: CGSize(width: 40, height: 40))
 
 class Toucher : Component {
-  var isEnabled:Bool = true
-  weak var node:SKNode?
 
   func didAddToNode() {
     self.node?.userInteractionEnabled = true
@@ -71,8 +69,6 @@ class MyScene : SKScene {
 }
 
 class SceneDebugger : Component {
-  var isEnabled:Bool = true
-  weak var node:SKNode?
   func didAddToNode() {
     let skView = (self.node as SKScene).view
     skView?.showsFPS = true
@@ -87,8 +83,6 @@ class SceneDebugger : Component {
 }
 
 class GravityLessBounds : Component {
-  var isEnabled:Bool = true
-  weak var node:SKNode?
   func didAddToNode() {
     let scene = (self.node as SKScene)
     scene.physicsWorld.gravity = CGVector(0,0)
@@ -103,8 +97,6 @@ enum Contact : UInt32 {
 }
 
 class Physical : Component {
-  var isEnabled:Bool = true
-  weak var node:SKNode?
   func didAddToNode() {
     self.node?.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 40, height: 40))
   }
@@ -112,8 +104,6 @@ class Physical : Component {
 }
 
 class Pinned : Component {
-  var isEnabled:Bool = true
-  weak var node:SKNode?
 //   override func didAddToNode() {
    func didAddToNode() {
 //    super.didAddToNode()
@@ -136,8 +126,6 @@ class Pinned : Component {
 
 
 class Reseting : Component {
-  var isEnabled:Bool = true
-  weak var node:SKNode?
 
   func didAddToNode() {
     self.node?.physicsBody = nil

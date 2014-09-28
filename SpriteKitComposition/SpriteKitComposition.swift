@@ -34,7 +34,7 @@ import SpriteKit
 
 @objc public class Component : ComponentBehaviour  {
   var observers:[NSObjectProtocol] = [NSObjectProtocol]()
-  private var behaviour:ComponentBehaviour { self as ComponentBehaviour }
+  private var behaviour:ComponentBehaviour { return self as ComponentBehaviour }
   var isEnabled:Bool = true
   private(set) weak var node:SKNode? {
     didSet {
@@ -49,6 +49,7 @@ import SpriteKit
     }
   }
 
+  init(){}
   final private func addObserver(predicate:@autoclosure () -> Bool, name:String, _ node:SKNode?, callback:(NSNotification) -> Void) {
     if(predicate()) {
       self.observers.append(NSNotificationCenter.defaultCenter().addObserverForName(name, object:node, queue: nil) { notification in
@@ -294,11 +295,11 @@ extension SKNode {
   
   final private func _addedChild(node:SKNode) {
     if self is SKScene {
-      for component in node.components { component.internalDidAddNodeToScene() }
+      for component in node.components { component._didAddNodeToScene() }
       for childNode in node.childNodes { node._addedChild(childNode) }
     }
-    else if self.scene != nil {
-      for component in node.components { component.internalDidAddNodeToScene() }
+    else if self.parent != nil {
+      for component in node.components { component._didAddNodeToScene() }
       for childNode in node.childNodes { node._addedChild(childNode) }
     }
     
@@ -324,14 +325,14 @@ extension SKNode {
     
   }
   
-  final private func removedChild(node:SKNode) {
+  final private func _removedChild(node:SKNode) {
     if self is SKScene {
-      for component in node.components { component.internalDidRemoveNodeFromScene() }
-      for childNode in node.childNodes { node.removedChild(childNode) }
+      for component in node.components { component._didRemoveNodeFromScene() }
+      for childNode in node.childNodes { node._removedChild(childNode) }
     }
     else if self.parent != nil {
-      for component in node.components { component.internalDidRemoveNodeFromScene() }
-      for childNode in node.childNodes { node.removedChild(childNode) }
+      for component in node.components { component._didRemoveNodeFromScene() }
+      for childNode in node.childNodes { node._removedChild(childNode) }
     }
     
   }
@@ -343,19 +344,19 @@ extension SKNode {
     for child in self.childNodes {
       if contains(nodesAsSKNodes, child) {
         childNodesToRemove.append(child)
-        self.removedChild(child)
+        self._removedChild(child)
       }
     }
     self._removeChildrenInArray(childNodesToRemove)
   }
   
   final func _removeAllChildren() {
-    for child in self.childNodes { self.removedChild(child) }
+    for child in self.childNodes { self._removedChild(child) }
     self._removeAllChildren()
   }
   
   final func _removeFromParent() {
-    self.parent?.removedChild(self)
+    self.parent?._removedChild(self)
     self._removeFromParent()
     
   }
