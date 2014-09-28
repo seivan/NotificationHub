@@ -134,10 +134,18 @@ class Reseting : Component {
     self.node?.physicsBody?.categoryBitMask = Contact.Moving.rawValue
     self.node?.physicsBody?.contactTestBitMask = Contact.Pinned.rawValue
     self.node?.physicsBody?.collisionBitMask = Contact.Pinned.rawValue
+    self.node?.physicsBody?.dynamic = true
+    self.node?.physicsBody?.pinned = false
   }
   
   func didAddNodeToScene() {
-    self.node?.physicsBody?.applyImpulse(CGVector(5.0,5.0))
+//    let delay = 0 * Double(NSEC_PER_SEC)
+//    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
+//    dispatch_after(time, dispatch_get_main_queue()) {
+//      println("FUCK")
+      self.node?.physicsBody?.applyImpulse(CGVector(15.0,15.0))
+//    }
+    
   }
   
   func didEndContact(contact:SKPhysicsContact) {
@@ -199,15 +207,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     player.addChild(gun)
 
     
-//    enemy.addComponent(Reseting())
-//    player.addComponent(Pinned())
-//
-//    
-//    scene.addComponent(GravityLessBounds())
+    enemy.addComponent(Reseting())
+    player.addComponent(Pinned())
+
+    
+    scene.addComponent(GravityLessBounds())
     scene.addComponent(SceneDebugger())
     
-//    scene.addComponent(Toucher())
-//    player.addComponent(Toucher())
+    scene.addComponent(Toucher())
+    player.addComponent(Toucher())
 
     scene.addChild(enemy)
     scene.addChild(player)

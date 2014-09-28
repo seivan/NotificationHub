@@ -1,6 +1,8 @@
 import SpriteKit
 
-
+class PKPhysicsContact : SKPhysicsContact {
+  
+}
 @objc private protocol ComponentBehaviour {
   optional func didAddToNode()
   optional func didAddNodeToScene()
@@ -89,7 +91,15 @@ import SpriteKit
     }
 
     self.addObserver(b.didEndContact? != nil, name: "didEndContact", self.node?.scene) { [weak self] notification in
-      if let x = self { if x.isEnabled { x.behaviour.didEndContact?((notification.userInfo as [String:SKPhysicsContact])["contact"]!) } }
+      if let x = self { if x.isEnabled {
+        let contact = notification.userInfo!["contact"]!
+        let p = contact as PKPhysicsContact
+        println(p)
+
+        
+        
+        }
+      }
     }
 
     self.addObserver(b.didBeginContactWithNode? != nil, name: "didBeginContactWithNode", self.node) { [weak self] notification in
@@ -251,8 +261,13 @@ extension SKScene : SKPhysicsContactDelegate {
   }
   
   public func didEndContact(contact: SKPhysicsContact) {
+    println(contact)
+    println("LOL")
+    let v = NSValue(nonretainedObject: contact)
+    let q = ["contact" : v]
     NSNotificationCenter.defaultCenter().postNotificationName("didEndContact", object: self,
-      userInfo: ["contact" : contact])
+      userInfo: q)
+    
     let nodeA = contact.bodyA.node!
     let nodeB = contact.bodyB.node!
     NSNotificationCenter.defaultCenter().postNotificationName("didEndContactWithNode", object: nodeA,
@@ -310,8 +325,9 @@ extension SKNode {
    func _addChild(node:SKNode!) {
     if node.parent != self {
       node.removeFromParent()
-      self._addedChild(node);
       self._addChild(node)
+      self._addedChild(node);
+
     }
     
   }
