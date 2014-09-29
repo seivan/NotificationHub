@@ -19,8 +19,14 @@ class Notification {
 }
 
 
+private extension Array {
+  func executeNotifications() {
+    for t in self { (t as Notification).execute() }
+  }
+}
 
 class NotificationHub {
+
   var observers = [Notification]()
   var observersKeyedName = [String:[Notification]]()
   let observersKeyedSender:NSMapTable = NSMapTable(
@@ -36,23 +42,18 @@ class NotificationHub {
     return Static.instance!
   }
   
-  init() {
-    
+  init() {}
+  
+  final private func observersKeyedSender(sender:AnyObject) -> [String:[Notification]]? {
+    return self.observersKeyedSender.objectForKey(sender) as [String:[Notification]]?
   }
   
-  final private func observersForPredicateTarget(target:AnyObject) -> [String:[Notification]]? {
-    return self.observersKeyedSender.objectForKey(target) as [String:[Notification]]?
-  }
   func addObserverForName(name: String, sender: AnyObject?, usingBlock block: (Notification) -> Void) -> Notification {
     let notification = Notification(name: name, sender: sender, closure: block)
-    if let target: AnyObject = sender {
-      if var observersForTarget = self.observersForPredicateTarget(target)?[name] {
-        observersForTarget.append(notification)
-      }
-      else {
-        var observers = [name:[notification]]
-        self.observersKeyedSender.setObject(observers, forKey: target)
-      }
+    
+    if let sender: AnyObject = sender {
+      if var observers = self.observersKeyedSender(sender)?[name] { observers.append(notification) }
+      else { self.observersKeyedSender.setObject([name:[notification]], forKey: sender) }
       
     }
     else {
@@ -66,22 +67,34 @@ class NotificationHub {
   
 
   func postNotification(notification: Notification) {
-    if let not = (self.observers.filter { $0 === notification }).first { not.execute() }
+    if let n = (self.observers.filter { $0 === notification }).first { n.execute() }
   }
   
   func postNotificationName(name: String, sender: AnyObject?) {
     if let sender: AnyObject = sender {
-      var observersKeyedName = self.observersKeyedSender.objectForKey(sender) as? [String:[Notification]]
-      if let notifications = observersKeyedName?[name] {
-        for notification in notifications { notification.execute() }
-      }
+      let observersKeyedName = self.observersKeyedSender.objectForKey(sender) as? [String:[Notification]]
+      observersKeyedName?[name]?.executeNotifications()
+      
     }
-    else if let notifications = self.observersKeyedName[name] {
-      for notification in notifications { notification.closure(notification) }
-    }
+    else { self.observersKeyedName[name]?.executeNotifications() }
   }
   
-  func postNotificationName(aName: String, sender: AnyObject?, userInfo aUserInfo: [NSObject : AnyObject]) {
+  func removeNotification(notification: Notification) {
+    let sender: AnyObject? = notification.sender
+    let name = notification.name
+    
+    if let sender: AnyObject = sender {
+      if var observers = self.observersKeyedSender(sender)?[name] { observers.append(notification) }
+      else { self.observersKeyedSender.setObject([name:[notification]], forKey: sender) }
+      
+    }
+    else {
+      if var list = self.observersKeyedName[name] { list.append(notification) }
+      else { self.observersKeyedName[name] = [notification] }
+    }
+    
+    self.observers = self.observers.filter { $0 !== notification }
+    
     
   }
 
@@ -90,8 +103,3 @@ class NotificationHub {
 }
 
 
-NotificationHub.defaultHub.addObserverForName("fuck", sender: nil) { not in
-  println(not.name)
-  println(not.sender)
-  
-}

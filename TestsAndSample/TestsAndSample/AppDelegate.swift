@@ -37,10 +37,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     self.window?.rootViewController = controller
     
     
+
+    var counter = 0
+    let notification = NotificationHub.defaultHub.addObserverForName("withoutSender", sender: nil) {
+     println("Success \(counter) \($0)")
+      counter += 1
+    }
+    
+    NotificationHub.defaultHub.postNotification(notification)
+    NotificationHub.defaultHub.postNotificationName("withoutSender", sender: nil)
     
 
+    
+    NotificationHub.defaultHub.postNotification(notification)
+    NotificationHub.defaultHub.postNotificationName("withoutSender", sender: nil)
 
     
+    NotificationHub.defaultHub.addObserverForName("withSender", sender: self) {
+      println("Success \(counter) \($0)")
+      counter += 1
+    }
+    NotificationHub.defaultHub.postNotificationName("withSender", sender: self)
 
     let enemy = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: 40, height: 40))
     enemy.name = "ENEMY"
