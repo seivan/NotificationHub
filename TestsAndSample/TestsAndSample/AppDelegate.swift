@@ -40,7 +40,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
 
     var counter = 0
-    var notification = DefaultHub.defaultHub
+    var notification = NotificationHubDefault
     
     notification.addObserverForName("withoutSender", sender: nil) {
         println("withoutSender Success \(counter) \($0)")

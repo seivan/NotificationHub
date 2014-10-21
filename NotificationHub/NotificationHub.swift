@@ -35,13 +35,16 @@ private extension Array {
 
 }
 
-struct Static {
+private struct Static {
   static var onceToken : dispatch_once_t = 0
   static var instance : NotificationHub<[String:Any]>? = nil
 }
 
 
-typealias DefaultHub = NotificationHub<[String:Any]>
+var NotificationHubDefault : NotificationHub<[String:Any]> {
+get { return NotificationHub<[String:Any]>.defaultHub }
+}
+
 
 class NotificationHub<T> {
   
@@ -51,7 +54,7 @@ class NotificationHub<T> {
     keyOptions: NSPointerFunctionsOpaquePersonality|NSPointerFunctionsWeakMemory,
     valueOptions: NSPointerFunctionsStrongMemory)
 
-  class var defaultHub:NotificationHub<[String:Any]> {
+  private class var defaultHub:NotificationHub<[String:Any]> {
     dispatch_once(&Static.onceToken) {
       Static.instance = NotificationHub<[String:Any]>()
     }
@@ -87,8 +90,7 @@ class NotificationHub<T> {
     else { return false }
   }
   
-  func postNotificationName(name: String, sender: AnyObject? = nil) {
-
+  func postNotificationName(name: String, sender: AnyObject? = nil, userInfo:T? = nil) {
     if let sender: AnyObject = sender {
       let observersKeyedName = self.observersKeyedSender.objectForKey(sender) as? [String:[Notification<T>]]
       observersKeyedName?[name]?._executeNotifications()
