@@ -37,38 +37,41 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     self.window?.rootViewController = controller
     
     
+    
 
     var counter = 0
-    var notification = NotificationHub.defaultHub.addObserverForName("withoutSender", sender: nil) {
-     println("withoutSender Success \(counter) \($0)")
-      counter += 1
+    var notification = DefaultHub.defaultHub
+    
+    notification.addObserverForName("withoutSender", sender: nil) {
+        println("withoutSender Success \(counter) \($0)")
+        counter += 1
     }
     
 
 
-    NotificationHub.defaultHub.postNotification(notification)
-    NotificationHub.defaultHub.postNotificationName("withoutSender", sender: nil)
-    
-    NotificationHub.defaultHub.removeNotification("withoutSender")
-    
-    NotificationHub.defaultHub.postNotification(notification)
-    NotificationHub.defaultHub.postNotificationName("withoutSender", sender: nil)
-
+//    NotificationHub.defaultHub.postNotification(notification)
+//    NotificationHub.defaultHub.postNotificationName("withoutSender", sender: nil)
 //    
-    notification = NotificationHub.defaultHub.addObserverForName("withSender", sender: self) {
-      println("withSender Success \(counter) \($0)")
-      counter += 1
-    }
-    
-        NotificationHub.defaultHub.removeAllNotifications("asd")
-    NotificationHub.defaultHub.postNotificationName("withSender", sender: self)
-    NotificationHub.defaultHub.postNotificationName("withSender", sender: self)
-
-    NotificationHub.defaultHub.removeNotification("withSender", sender:self)
-
-    NotificationHub.defaultHub.postNotificationName("withSender", sender: self)
-    NotificationHub.defaultHub.postNotificationName("withSender", sender: self)
-
+//    NotificationHub.defaultHub.removeNotification("withoutSender")
+//    
+//    NotificationHub.defaultHub.postNotification(notification)
+//    NotificationHub.defaultHub.postNotificationName("withoutSender", sender: nil)
+//
+////    
+//    notification = NotificationHub.defaultHub.addObserverForName("withSender", sender: self) {
+//      println("withSender Success \(counter) \($0)")
+//      counter += 1
+//    }
+//    
+//        NotificationHub.defaultHub.removeAllNotifications("asd")
+//    NotificationHub.defaultHub.postNotificationName("withSender", sender: self)
+//    NotificationHub.defaultHub.postNotificationName("withSender", sender: self)
+//
+//    NotificationHub.defaultHub.removeNotification("withSender", sender:self)
+//
+//    NotificationHub.defaultHub.postNotificationName("withSender", sender: self)
+//    NotificationHub.defaultHub.postNotificationName("withSender", sender: self)
+//
 
     let enemy = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: 40, height: 40))
     enemy.name = "ENEMY"

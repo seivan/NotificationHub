@@ -1,15 +1,15 @@
 //
-//  SpriteKitCompositionTests.swift
+//  PerformanceTests.swift
 //  TestsAndSample
 //
-//  Created by Seivan Heidari on 15/09/14.
+//  Created by Seivan Heidari on 04/10/14.
 //  Copyright (c) 2014 Seivan Heidari. All rights reserved.
 //
 
 import UIKit
 import XCTest
 
-class SpriteKitCompositionTests: XCTestCase {
+class PerformanceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()

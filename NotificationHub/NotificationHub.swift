@@ -1,12 +1,12 @@
 import Foundation
 import SpriteKit
 
-class Notification {
-  typealias NotificationClosure = (Notification) -> Void
+class Notification<T> {
+  typealias NotificationClosure = (Notification<T>) -> Void
   let name:String
   private(set) weak var sender:AnyObject?
   private let closure:NotificationClosure
-  private(set) var userInfo:[NSObject : AnyObject]?
+  private(set) var userInfo:T?
 
   private init(name:String, sender:AnyObject?, closure:NotificationClosure) {
     self.name = name
@@ -23,42 +23,48 @@ class Notification {
 
 private extension Array {
   func _executeNotifications() {
-    for t in self { (t as Notification).execute() }
+    for t in self { (t as Notification<Any>).execute() }
   }
-  mutating func _removeNotification(notification:Notification) {
-    self = self.filter { ($0 as Notification) !== notification }
+  mutating func _removeNotification <U>(notification:Notification<U>) {
+    self = self.filter { ($0 as Notification<U>) !== notification }
   }
   mutating func _removeNotification(name:String) {
-    self = self.filter { ($0 as Notification).name != name }
+    self = self.filter { ($0 as Notification<Any>).name != name }
   }
 
 
 }
 
-class NotificationHub {
+struct Static {
+  static var onceToken : dispatch_once_t = 0
+  static var instance : NotificationHub<[String:Any]>? = nil
+}
 
-  var observersUnsorted    = [Notification]()
-  var observersKeyedName   = [String:[Notification]]()
-  let observersKeyedSender = NSMapTable(
+
+typealias DefaultHub = NotificationHub<[String:Any]>
+
+class NotificationHub<T> {
+  
+  final private var observersUnsorted    = [Notification<T>]()
+  final private var observersKeyedName   = [String:[Notification<T>]]()
+  final private let observersKeyedSender = NSMapTable(
     keyOptions: NSPointerFunctionsOpaquePersonality|NSPointerFunctionsWeakMemory,
     valueOptions: NSPointerFunctionsStrongMemory)
 
-  class var defaultHub : NotificationHub {
-    struct Static {
-      static var onceToken : dispatch_once_t = 0
-      static var instance : NotificationHub? = nil
+  class var defaultHub:NotificationHub<[String:Any]> {
+    dispatch_once(&Static.onceToken) {
+      Static.instance = NotificationHub<[String:Any]>()
     }
-    dispatch_once(&Static.onceToken) { Static.instance = NotificationHub() }
     return Static.instance!
   }
   
   init() {}
   
-  final private func observersKeyedNameForSender(sender:AnyObject) -> [String:[Notification]]? {
-    return self.observersKeyedSender.objectForKey(sender) as [String:[Notification]]?
+  final private func observersKeyedNameForSender(sender:AnyObject) -> [String:[Notification<T>]]? {
+    return self.observersKeyedSender.objectForKey(sender) as [String:[Notification<T>]]?
   }
   
-  func addObserverForName(name: String, sender: AnyObject? = nil, block: (Notification) -> Void) -> Notification {
+  func addObserverForName(name: String, sender: AnyObject? = nil, block: (Notification<T>) -> Void) -> Notification<T> {
     let notification = Notification(name: name, sender: sender, closure: block)
     
     if let sender: AnyObject = sender {
@@ -76,21 +82,22 @@ class NotificationHub {
   }
   
 
-  func postNotification(notification: Notification) -> Bool {
+  func postNotification(notification: Notification<T>) -> Bool {
     if let n = (self.observersUnsorted.filter { $0 === notification }).first { return n.execute() }
     else { return false }
   }
   
   func postNotificationName(name: String, sender: AnyObject? = nil) {
+
     if let sender: AnyObject = sender {
-      let observersKeyedName = self.observersKeyedSender.objectForKey(sender) as? [String:[Notification]]
+      let observersKeyedName = self.observersKeyedSender.objectForKey(sender) as? [String:[Notification<T>]]
       observersKeyedName?[name]?._executeNotifications()
       
     }
     else { self.observersKeyedName[name]?._executeNotifications() }
   }
   
-  func removeNotification(notification: Notification) {
+  func removeNotification(notification: Notification<T>) {
     let sender: AnyObject? = notification.sender
     let name = notification.name
     
@@ -132,13 +139,13 @@ class NotificationHub {
   
   //Remove notifications with the name from both sender and without sender
   func removeAllNotifications(name:String) {
-    var observersKeyedName = self.observersKeyedSender.objectEnumerator().allObjects as [[String:[Notification]]]
+    var observersKeyedName = self.observersKeyedSender.objectEnumerator().allObjects as [[String:[Notification<T>]]]
     var keys = self.observersKeyedSender.keyEnumerator().allObjects as [AnyObject]
     
-    var notificationsToRemove:[Notification]?
+    var notificationsToRemove:[Notification<T>]?
     
     for key in keys {
-      var pairs = self.observersKeyedSender.objectForKey(key) as [String:[Notification]]?
+      var pairs = self.observersKeyedSender.objectForKey(key) as [String:[Notification<T>]]?
       if var pairs = pairs {
         notificationsToRemove = pairs.removeValueForKey(name)
         if pairs.isEmpty { self.observersKeyedSender.removeObjectForKey(key) }
