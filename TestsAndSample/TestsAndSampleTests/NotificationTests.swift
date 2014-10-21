@@ -11,25 +11,37 @@ import XCTest
 
 
 class NotificationTests: XCTestCase {
-//  let hub:NotificationHub = NotificationHub.defaultHub
-//  override func setUp() {
-//    super.setUp()
-//  }
-//    
-//  override func tearDown() {
-//    super.tearDown()
-//  }
-//  
-//  func testDefaultHub() {
-//    XCTAssertNotNil(hub)
-//    XCTAssertTrue(self.hub === NotificationHub.defaultHub)
-//  }
-//  
-//  func testCreateNotification() {
-//    var hub = Notification()<[String:String]>
-//  }
-//  
-//  
-//
+  let hub = NotificationHubDefault
+  let notificationName = "notificationName"
+  let notificationSender = self
+  override func setUp() {
+    super.setUp()
+  }
+    
+  override func tearDown() {
+    super.tearDown()
+  }
+  
+  func testDefaultHub() {
+    XCTAssertNotNil(self.hub)
+    XCTAssertTrue(self.hub === NotificationHubDefault)
+  }
+  
+  func testCreateNotificationHub() {
+    var hub = NotificationHub<[String:String]>()
+    XCTAssertFalse(self.hub === hub)
+  }
+  
+  func testAddDefaultNotification() {
+    NotificationHubDefault.addObserverForName(self.notificationName, sender: nil) {
+            println($0)
+    }
+    self.hub.addObserverForName(self.notificationName, sender: nil) {
+      println($0)
+    }
+    
+  }
+  
+
 
 }
