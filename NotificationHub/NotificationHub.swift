@@ -98,7 +98,7 @@ class NotificationHub<T> {
       notifications = self.notificationsKeyedName[name]
     }
     
-    
+    ADD USERINFO IN EXECUTE and then remove after posting
     if let notifications = notifications {
       for notification in notifications { notification.execute() }
     }
