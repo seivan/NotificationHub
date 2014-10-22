@@ -45,10 +45,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     hub.addObserverForName("withoutSender", sender: nil) {
         println("withoutSender Success \(counter) \($0)")
         counter += 1
+        println(counter)
     }
     
     hub.postNotificationName("withoutSender", sender: nil, userInfo: nil)
-    
+    hub.postNotificationName("withoutSender", sender: self, userInfo: nil)
 
 
 //    NotificationHub.defaultHub.postNotification(notification)

@@ -94,8 +94,10 @@ class NotificationHub<T> {
     if let sender: AnyObject = sender {
       notifications = self.observersKeyedNameForSender(sender)?[name]
     }
+    else {
+      notifications = self.notificationsKeyedName[name]
+    }
     
-    notifications = notifications ?? self.notificationsKeyedName[name]
     
     if let notifications = notifications {
       for notification in notifications { notification.execute() }

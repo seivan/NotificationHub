@@ -33,15 +33,56 @@ class NotificationTests: XCTestCase {
   }
   
   func testAddDefaultNotification() {
-    NotificationHubDefault.addObserverForName(self.notificationName, sender: nil) {
-            println($0)
+    var notification = self.hub.addObserverForName(self.notificationName, sender: nil) { notification in
     }
-    self.hub.addObserverForName(self.notificationName, sender: nil) {
-      println($0)
-    }
+    XCTAssertNotNil(notification)
+    XCTAssertEqual(self.notificationName, notification.name)
+    XCTAssertNil(notification.sender)
+    XCTAssertTrue(notification.userInfo == nil)
     
   }
   
 
+  func testPostDefaultNotificationWithoutSender() {
+    let expectation = expectationWithDescription(self.notificationName)
+
+    NotificationHubDefault.addObserverForName(self.notificationName, sender: nil) { notification in
+      XCTAssertNotNil(notification)
+      XCTAssertEqual(self.notificationName, notification.name)
+      XCTAssertNil(notification.sender)
+      XCTAssertTrue(notification.userInfo == nil)
+      expectation.fulfill()
+   }
+    self.hub.postNotificationName(self.notificationName, sender: nil, userInfo: nil)
+  }
+
+  func testPostDefaultNotificationWithSender() {
+    let expectation = expectationWithDescription(self.notificationName)
+    
+    NotificationHubDefault.addObserverForName(self.notificationName, sender: nil) { notification in
+      XCTAssertNotNil(notification)
+      XCTAssertEqual(self.notificationName, notification.name)
+      XCTAssertNil(notification.sender)
+      XCTAssertTrue(notification.userInfo == nil)
+      expectation.fulfill()
+    }
+    self.hub.postNotificationName(self.notificationName, sender: nil, userInfo: nil)
+  }
+
+  func testPostDefaultNotificationWithNotification() {
+    let expectation = expectationWithDescription(self.notificationName)
+    
+   let notification = NotificationHubDefault.addObserverForName(self.notificationName, sender: nil) { notification in
+      XCTAssertNotNil(notification)
+      XCTAssertEqual(self.notificationName, notification.name)
+      XCTAssertNil(notification.sender)
+      XCTAssertTrue(notification.userInfo == nil)
+      expectation.fulfill()
+    }
+    self.hub.postNotification(notification)
+  }
+
+  
+  
 
 }
