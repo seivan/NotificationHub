@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Seivan Heidari. All rights reserved.
 //
 
-import UIKit
+
 import XCTest
 
 class PerformanceTests: XCTestCase {

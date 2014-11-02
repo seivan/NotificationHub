@@ -6,7 +6,6 @@
 //  Copyright (c) 2014 Seivan Heidari. All rights reserved.
 //
 
-import UIKit
 import XCTest
 
 
@@ -71,11 +70,12 @@ class NotificationTests: XCTestCase {
     let expectation = expectationWithDescription(self.notificationName)
     
     NotificationHubDefault.addObserverForName(self.notificationName, sender: self) { notification in
+      println("CALL");
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
       XCTAssertNil(notification.sender)
       XCTAssertTrue(notification.userInfo == nil)
-      expectation.fulfill()
+//      expectation.fulfill()
     }
     self.hub.postNotificationName(self.notificationName, sender: self, userInfo: nil)
     
