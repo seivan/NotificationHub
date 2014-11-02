@@ -1,7 +1,7 @@
 import Foundation
 import SpriteKit
 
-class Notification<T> {
+class Notification<T> : Equatable {
   typealias NotificationClosure = (Notification<T>) -> Void
   let name:String
   private(set) weak var sender:AnyObject?
@@ -18,7 +18,13 @@ class Notification<T> {
     return true
   }
   
+  
 }
+
+func ==<T>(lhs: Notification<T>, rhs: Notification<T>) -> Bool {
+    return lhs === rhs
+}
+
 
 
 
@@ -84,8 +90,11 @@ class NotificationHub<T> {
   
 
   func postNotification(notification: Notification<T>) -> Bool {
-    if let n = (self.notificationsUnsorted.filter { $0 === notification }).first { return n.execute() }
+    if contains(self.notificationsUnsorted, notification) { return notification.execute() }
     else { return false }
+    
+    //if let n = (self.notificationsUnsorted.filter { $0 === notification }).first { return n.execute() }
+    //else { return false }
   }
   
   func postNotificationName(name: String, sender: AnyObject? = nil, userInfo:T? = nil) {
@@ -94,10 +103,11 @@ class NotificationHub<T> {
     if let sender: AnyObject = sender {
       notifications = self.observersKeyedNameForSender(sender)?[name]
     }
-    else {
-      notifications = self.notificationsKeyedName[name]
-    }
-    
+//    else  {
+//      notifications = self.notificationsKeyedName[name]
+//    }
+
+    notifications = notifications ?? self.notificationsKeyedName[name]
 //    ADD USERINFO IN EXECUTE and then remove after posting
     if let notifications = notifications {
       for notification in notifications { notification.execute() }

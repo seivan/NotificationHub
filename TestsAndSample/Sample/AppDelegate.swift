@@ -16,6 +16,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   func applicationDidFinishLaunching(aNotification: NSNotification) {
     // Insert code here to initialize your application
+    
+    NSNotificationCenter.defaultCenter().addObserverForName("test", object: nil, queue: nil) { n in
+      println("WITHOUT");
+    }
+    
+    NSNotificationCenter.defaultCenter().postNotificationName("test", object: nil)
+    NSNotificationCenter.defaultCenter().postNotificationName("test", object: self)
+    
+
+    NSNotificationCenter.defaultCenter().addObserverForName("x", object: self, queue: nil) { n in
+      println("WITH");
+    }
+    
+    NSNotificationCenter.defaultCenter().postNotificationName("x", object: nil)
+    NSNotificationCenter.defaultCenter().postNotificationName("x", object: self)
+
   }
 
   func applicationWillTerminate(aNotification: NSNotification) {
