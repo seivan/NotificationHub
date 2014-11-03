@@ -9,7 +9,7 @@
 import XCTest
 
 
-class NotificationTests: XCTestCase {
+class NotificationHubTests: XCTestCase {
   var hub = NotificationHub<[String:Any]>()
   let notificationName = "notificationName"
   var notificationUserInfo = [String:Any]()

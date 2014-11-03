@@ -10,7 +10,7 @@
 		22B175911A06BD35004904C5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B175901A06BD35004904C5 /* AppDelegate.swift */; };
 		22B175931A06BD35004904C5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 22B175921A06BD35004904C5 /* Images.xcassets */; };
 		22B175961A06BD35004904C5 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 22B175941A06BD35004904C5 /* MainMenu.xib */; };
-		22B175B21A06BDBA004904C5 /* NotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B175AE1A06BDBA004904C5 /* NotificationTests.swift */; };
+		22B175B21A06BDBA004904C5 /* NotificationHubTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B175AE1A06BDBA004904C5 /* NotificationHubTests.swift */; };
 		22B175B31A06BDBA004904C5 /* PerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B175AF1A06BDBA004904C5 /* PerformanceTests.swift */; };
 		22B175B51A06BEB3004904C5 /* NotificationHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225F742619D8BEDF007F31C5 /* NotificationHub.swift */; };
 		22B175B61A06BEB3004904C5 /* NotificationHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225F742619D8BEDF007F31C5 /* NotificationHub.swift */; };
@@ -35,7 +35,7 @@
 		22B175951A06BD35004904C5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		22B1759B1A06BD35004904C5 /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		22B175AD1A06BDBA004904C5 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		22B175AE1A06BDBA004904C5 /* NotificationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTests.swift; sourceTree = "<group>"; };
+		22B175AE1A06BDBA004904C5 /* NotificationHubTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationHubTests.swift; sourceTree = "<group>"; };
 		22B175AF1A06BDBA004904C5 /* PerformanceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PerformanceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -108,7 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				22B175AD1A06BDBA004904C5 /* Info.plist */,
-				22B175AE1A06BDBA004904C5 /* NotificationTests.swift */,
+				22B175AE1A06BDBA004904C5 /* NotificationHubTests.swift */,
 				22B175AF1A06BDBA004904C5 /* PerformanceTests.swift */,
 			);
 			path = Tests;
@@ -223,7 +223,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				22B175B31A06BDBA004904C5 /* PerformanceTests.swift in Sources */,
-				22B175B21A06BDBA004904C5 /* NotificationTests.swift in Sources */,
+				22B175B21A06BDBA004904C5 /* NotificationHubTests.swift in Sources */,
 				22B175B51A06BEB3004904C5 /* NotificationHub.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
