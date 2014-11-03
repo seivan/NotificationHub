@@ -14,6 +14,7 @@ class Notification<T> : Equatable {
     self.closure = closure
     self.sender = sender
   }
+  
   final private func execute() -> Bool {
     self.closure(self)
     return true

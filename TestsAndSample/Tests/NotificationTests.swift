@@ -119,6 +119,34 @@ class NotificationTests: XCTestCase {
     
   }
 
+  func testRemoveDefaultSenderLessNotificationWithoutSender() {
+    var expectation = self.expectationWithDescription(self.notificationName)
+    var didRemove = true
+    self.hub.addObserverForName(self.notificationName, sender: nil) { notification in
+      didRemove = false
+    }
+    self.hub.removeNotification(self.notificationName, sender: nil)
+    self.hub.postNotificationName(self.notificationName, sender: nil, userInfo: nil)
+    if didRemove { expectation.fulfill() }
+    self.waitForExpectationsWithTimeout(1, nil)
+    
+  }
+
+  
+  func testRemoveDefaultSenderLessNotificationWithSender() {
+    var expectation = self.expectationWithDescription(self.notificationName)
+    var didRemove = true
+    self.hub.addObserverForName(self.notificationName, sender: nil) { notification in
+      didRemove = false
+    }
+    self.hub.removeNotification(self.notificationName, sender: self)
+    self.hub.postNotificationName(self.notificationName, sender: self, userInfo: nil)
+    if didRemove { expectation.fulfill() }
+    self.waitForExpectationsWithTimeout(1, nil)
+    
+  }
+
+  
 
 
 }
