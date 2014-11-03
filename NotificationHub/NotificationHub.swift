@@ -114,7 +114,7 @@ class NotificationHub<T> {
 //    }
 
     notifications = notifications ?? self.notificationsKeyedName[name]
-//    ADD USERINFO IN EXECUTE and then remove after posting
+
     if let notifications = notifications {
       for notification in notifications { notification.execute() }
     }
@@ -138,20 +138,18 @@ class NotificationHub<T> {
         let newNotifications = notifications.filter { ($0 as Notification<T>) !== notification }
         if newNotifications.isEmpty { self.notificationsKeyedName[name] = nil }
         else { self.notificationsKeyedName[name] = newNotifications }
-
-
+      }
     }
     
-//    self.observersUnsorted._removeNotification(notification)
+
+    self.notificationsUnsorted = self.notificationsUnsorted.filter  { return $0 != notification }
     
-   }
   }
   
   //Remove notification with name or name & sender
   func removeNotification(name:String, sender: AnyObject? = nil) {
     let name = name
     let sender: AnyObject? = sender
-
     
     if let sender: AnyObject = sender {
       if let notifications = self.observersKeyedNameForSender(sender)?[name] {
@@ -159,20 +157,22 @@ class NotificationHub<T> {
         if newNotifications.isEmpty { self.notificationsKeyedSender.removeObjectForKey(sender) }
         else { self.notificationsKeyedSender.setObject(newNotifications, forKey: sender) }
       }
-      
+      else { self.removeNotifications(name) }
     }
-    else {
-//      self.notificationsKeyedName[name]?._removeNotification(name)
-      if let notifications = self.notificationsKeyedName[name] {
-        let newNotifications = notifications.filter { ($0 as Notification<T>).name != name }
-        if newNotifications.isEmpty { self.notificationsKeyedName[name] = nil }
-        else { self.notificationsKeyedName[name] = newNotifications }
+    else { self.removeNotifications(name) }
+    
+    self.notificationsUnsorted = self.notificationsUnsorted.filter  {
+      return $0.name != name && $0.sender !== sender
+    }
 
+  }
+  
+  func removeNotifications(name:String) {
+    if let notifications = self.notificationsKeyedName[name] {
+      let newNotifications = notifications.filter { ($0 as Notification<T>).name != name }
+      if newNotifications.isEmpty { self.notificationsKeyedName[name] = nil }
+      else { self.notificationsKeyedName[name] = newNotifications }
     }
-    
-//    self.notificationsUnsorted._removeNotification(name)
-    
-   }
   }
   
   //Remove notifications with the name from both sender and without sender
