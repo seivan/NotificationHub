@@ -47,7 +47,7 @@ class NotificationHubTests: XCTestCase {
   
 
   func testPostDefaultSenderLessNotificationWithoutSender() {
-    var expectation = self.expectationWithDescription(self.notificationName)
+    let expectation = self.expectationWithDescription(self.notificationName)
 
     self.hub.addObserverForName(self.notificationName, sender: nil) { notification in
       XCTAssertNotNil(notification)
@@ -62,7 +62,7 @@ class NotificationHubTests: XCTestCase {
   }
   
   func testPostDefaultSenderLessNotificationWithSender() {
-    var expectation = self.expectationWithDescription(self.notificationName)
+    let expectation = self.expectationWithDescription(self.notificationName)
     
     self.hub.addObserverForName(self.notificationName, sender: nil) { notification in
       XCTAssertNotNil(notification)
@@ -78,6 +78,7 @@ class NotificationHubTests: XCTestCase {
 
   func testPostDefaultNotificationWithoutSender() {
     let expectation = self.expectationWithDescription(self.notificationName)
+    
     var didNotCall = true
     self.hub.addObserverForName(self.notificationName, sender: self) { notification in
       didNotCall = false
@@ -88,7 +89,7 @@ class NotificationHubTests: XCTestCase {
   }
   
   func testPostDefaultNotificationWithSender() {
-    var expectation = self.expectationWithDescription(self.notificationName)
+    let expectation = self.expectationWithDescription(self.notificationName)
 
     self.hub.addObserverForName(self.notificationName, sender: self) { notification in
       XCTAssertNotNil(notification)
@@ -105,7 +106,7 @@ class NotificationHubTests: XCTestCase {
   }
   
   func testPostDefaultNotification() {
-    var expectation = self.expectationWithDescription(self.notificationName)
+    let expectation = self.expectationWithDescription(self.notificationName)
     
     let notification = self.hub.addObserverForName(self.notificationName, sender: self) { notification in
       XCTAssertNotNil(notification)
@@ -122,7 +123,8 @@ class NotificationHubTests: XCTestCase {
   }
 
   func testRemoveDefaultSenderLessNotificationWithoutSender() {
-    var expectation = self.expectationWithDescription(self.notificationName)
+    let expectation = self.expectationWithDescription(self.notificationName)
+    
     var didRemove = true
     self.hub.addObserverForName(self.notificationName, sender: nil) { notification in
       didRemove = false
@@ -136,7 +138,8 @@ class NotificationHubTests: XCTestCase {
 
   
   func testRemoveDefaultSenderLessNotificationWithSender() {
-    var expectation = self.expectationWithDescription(self.notificationName)
+    let expectation = self.expectationWithDescription(self.notificationName)
+    
     var didRemove = true
     self.hub.addObserverForName(self.notificationName, sender: nil) { notification in
       didRemove = false
@@ -149,7 +152,8 @@ class NotificationHubTests: XCTestCase {
   }
 
   func testRemoveDefaultNotificationWithoutSender() {
-    var expectation = self.expectationWithDescription(self.notificationName)
+    let expectation = self.expectationWithDescription(self.notificationName)
+    
     var didNotRemove = false
     self.hub.addObserverForName(self.notificationName, sender: self) { notification in
       didNotRemove = true
@@ -163,7 +167,8 @@ class NotificationHubTests: XCTestCase {
   
   
   func testRemoveDefaultNotificationWithSender() {
-    var expectation = self.expectationWithDescription(self.notificationName)
+    let expectation = self.expectationWithDescription(self.notificationName)
+    
     var didRemove = true
     self.hub.addObserverForName(self.notificationName, sender: self) { notification in
       didRemove = false
