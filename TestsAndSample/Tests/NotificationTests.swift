@@ -10,13 +10,13 @@ import XCTest
 
 
 class NotificationTests: XCTestCase {
-  let hub = NotificationHubDefault
+  var hub = NotificationHub<[String:Any]>()
   let notificationName = "notificationName"
   var notificationUserInfo = [String:Any]()
   override func setUp() {
     super.setUp()
     self.notificationUserInfo["key"] = 5
-
+    var hub = NotificationHub<[String:Any]>()
   }
     
   override func tearDown() {
@@ -25,7 +25,8 @@ class NotificationTests: XCTestCase {
 
   
   func testDefaultNotificationHub() {
-    XCTAssert(self.hub === NotificationHubDefault)
+    XCTAssert(NotificationHubDefault === NotificationHubDefault)
+    XCTAssertNotNil(NotificationHubDefault)
   }
   
   func testCreateNotificationHub() {
@@ -77,7 +78,7 @@ class NotificationTests: XCTestCase {
 
   func testPostDefaultNotificationWithoutSender() {
     var didCallNotification = false
-    NotificationHubDefault.addObserverForName(self.notificationName, sender: self) { notification in
+    self.hub.addObserverForName(self.notificationName, sender: self) { notification in
       var didCallNotification = true
     }
     self.hub.postNotificationName(self.notificationName, sender: nil, userInfo: nil)
@@ -88,7 +89,7 @@ class NotificationTests: XCTestCase {
   func testPostDefaultNotificationWithSender() {
     var expectation = self.expectationWithDescription(self.notificationName)
 
-    NotificationHubDefault.addObserverForName(self.notificationName, sender: self) { notification in
+    self.hub.addObserverForName(self.notificationName, sender: self) { notification in
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
       XCTAssertNotNil(notification.sender)
@@ -105,7 +106,7 @@ class NotificationTests: XCTestCase {
   func testPostDefaultNotification() {
     var expectation = self.expectationWithDescription(self.notificationName)
     
-    let notification = NotificationHubDefault.addObserverForName(self.notificationName, sender: self) { notification in
+    let notification = self.hub.addObserverForName(self.notificationName, sender: self) { notification in
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
       XCTAssertNotNil(notification.sender)
@@ -137,6 +138,33 @@ class NotificationTests: XCTestCase {
     var expectation = self.expectationWithDescription(self.notificationName)
     var didRemove = true
     self.hub.addObserverForName(self.notificationName, sender: nil) { notification in
+      didRemove = false
+    }
+    self.hub.removeNotification(self.notificationName, sender: self)
+    self.hub.postNotificationName(self.notificationName, sender: nil, userInfo: nil)
+    if didRemove { expectation.fulfill() }
+    self.waitForExpectationsWithTimeout(1, nil)
+    
+  }
+
+  func testRemoveDefaultNotificationWithoutSender() {
+    var expectation = self.expectationWithDescription(self.notificationName)
+    var didRemove = false
+    self.hub.addObserverForName(self.notificationName, sender: self) { notification in
+      didRemove = true
+    }
+    self.hub.removeNotification(self.notificationName, sender: nil)
+    self.hub.postNotificationName(self.notificationName, sender: self, userInfo: nil)
+    if didRemove  { expectation.fulfill() }
+    self.waitForExpectationsWithTimeout(1, nil)
+    
+  }
+  
+  
+  func testRemoveDefaultNotificationWithSender() {
+    var expectation = self.expectationWithDescription(self.notificationName)
+    var didRemove = true
+    self.hub.addObserverForName(self.notificationName, sender: self) { notification in
       didRemove = false
     }
     self.hub.removeNotification(self.notificationName, sender: self)
