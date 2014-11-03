@@ -22,6 +22,11 @@ class NotificationTests: XCTestCase {
   override func tearDown() {
     super.tearDown()
   }
+
+  
+  func testDefaultNotificationHub() {
+    XCTAssert(self.hub === NotificationHubDefault)
+  }
   
   func testCreateNotificationHub() {
     var hub = NotificationHub<[String:String]>()
@@ -49,9 +54,9 @@ class NotificationTests: XCTestCase {
       XCTAssertNil(notification.sender)
       XCTAssertTrue(notification.userInfo == nil)
       expectation.fulfill()
-   }
+    }
     self.hub.postNotificationName(self.notificationName, sender: nil, userInfo: nil)
-    self.waitForExpectationsWithTimeout(2, nil)
+    self.waitForExpectationsWithTimeout(1, nil)
     
   }
   
@@ -66,69 +71,54 @@ class NotificationTests: XCTestCase {
       expectation.fulfill()
     }
     self.hub.postNotificationName(self.notificationName, sender: self, userInfo: nil)
-    self.waitForExpectationsWithTimeout(2,nil)
+    self.waitForExpectationsWithTimeout(1,nil)
     
   }
 
-//  func testPostDefaultNotificationWithSender() {
-//    let expectation = expectationWithDescription(self.notificationName)
-//    
-//    NotificationHubDefault.addObserverForName(self.notificationName, sender: self) { notification in
-//      println("CALL");
-//      XCTAssertNotNil(notification)
-//      XCTAssertEqual(self.notificationName, notification.name)
-//      XCTAssertNil(notification.sender)
-//      XCTAssertTrue(notification.userInfo == nil)
-////      expectation.fulfill()
-//    }
-//    self.hub.postNotificationName(self.notificationName, sender: self, userInfo: nil)
-//    
-//    var didCallNotification = false
-//    NotificationHubDefault.addObserverForName(self.notificationName, sender: nil) { notification in
-//      didCallNotification = true
-//    }
-//    
-//    self.hub.postNotificationName(self.notificationName, sender: self, userInfo: nil)
-//    XCTAssertFalse(didCallNotification)
-//
-//  }
-//
-//  func testPostDefaultNotificationWithNotification() {
-//    let expectation = expectationWithDescription(self.notificationName)
-//    
-//   let notification = NotificationHubDefault.addObserverForName(self.notificationName, sender: nil) { notification in
-//      XCTAssertNotNil(notification)
-//      XCTAssertEqual(self.notificationName, notification.name)
-//      XCTAssertNil(notification.sender)
-//      XCTAssertTrue(notification.userInfo == nil)
-//      expectation.fulfill()
-//    }
-//    self.hub.postNotification(notification)
-//  }
-//
-//  func testPostDefaultNotificationWithUserInfo() {
-//    let expectation = expectationWithDescription(self.notificationName)
-//    
-//    let notification = NotificationHubDefault.addObserverForName(self.notificationName, sender: nil) { notification in
-//      XCTAssertNotNil(notification)
-//      XCTAssertEqual(self.notificationName, notification.name)
-//      XCTAssertNil(notification.sender)
-//      XCTAssertTrue(notification.userInfo != nil)
-////      let list = notification.userInfo?["Key"] as [Any]
-////      XCTAssertEqual(list.count, 1)
-////
-////      expectation.fulfill()
-//    }
-//    XCTAssertTrue(notification.userInfo == nil)
-//    XCTAssertEqual(self.notificationUserInfo.count, 1)
-//    
-//    self.hub.postNotificationName(
-//      self.notificationName,
-//      sender: nil,
-//      userInfo: self.notificationUserInfo)
-//  }
-//
-//  
-//  
+  func testPostDefaultNotificationWithoutSender() {
+    var didCallNotification = false
+    NotificationHubDefault.addObserverForName(self.notificationName, sender: self) { notification in
+      var didCallNotification = true
+    }
+    self.hub.postNotificationName(self.notificationName, sender: nil, userInfo: nil)
+    XCTAssertFalse(didCallNotification)
+
+  }
+  
+  func testPostDefaultNotificationWithSender() {
+    var expectation = self.expectationWithDescription(self.notificationName)
+
+    NotificationHubDefault.addObserverForName(self.notificationName, sender: self) { notification in
+      XCTAssertNotNil(notification)
+      XCTAssertEqual(self.notificationName, notification.name)
+      XCTAssertNotNil(notification.sender)
+      XCTAssert(self === notification.sender)
+      XCTAssertTrue(notification.userInfo == nil)
+      expectation.fulfill()
+
+    }
+    self.hub.postNotificationName(self.notificationName, sender: self, userInfo: nil)
+    self.waitForExpectationsWithTimeout(1,nil)
+
+  }
+  
+  func testPostDefaultNotification() {
+    var expectation = self.expectationWithDescription(self.notificationName)
+    
+    let notification = NotificationHubDefault.addObserverForName(self.notificationName, sender: self) { notification in
+      XCTAssertNotNil(notification)
+      XCTAssertEqual(self.notificationName, notification.name)
+      XCTAssertNotNil(notification.sender)
+      XCTAssert(self === notification.sender)
+      XCTAssertTrue(notification.userInfo == nil)
+      expectation.fulfill()
+      
+    }
+    self.hub.postNotification(notification)
+    self.waitForExpectationsWithTimeout(1,nil)
+    
+  }
+
+
 
 }

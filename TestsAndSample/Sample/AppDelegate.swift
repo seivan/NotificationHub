@@ -29,6 +29,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       println("WITH");
     }
     
+
     NSNotificationCenter.defaultCenter().postNotificationName("x", object: nil)
     NSNotificationCenter.defaultCenter().postNotificationName("x", object: self)
 

@@ -10,7 +10,6 @@
 		22B175911A06BD35004904C5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B175901A06BD35004904C5 /* AppDelegate.swift */; };
 		22B175931A06BD35004904C5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 22B175921A06BD35004904C5 /* Images.xcassets */; };
 		22B175961A06BD35004904C5 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 22B175941A06BD35004904C5 /* MainMenu.xib */; };
-		22B175B11A06BDBA004904C5 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 22B175AD1A06BDBA004904C5 /* Info.plist */; };
 		22B175B21A06BDBA004904C5 /* NotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B175AE1A06BDBA004904C5 /* NotificationTests.swift */; };
 		22B175B31A06BDBA004904C5 /* PerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B175AF1A06BDBA004904C5 /* PerformanceTests.swift */; };
 		22B175B51A06BEB3004904C5 /* NotificationHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225F742619D8BEDF007F31C5 /* NotificationHub.swift */; };
@@ -159,7 +158,7 @@
 		22AFC471195F9D02003572F3 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0610;
 				ORGANIZATIONNAME = "Seivan Heidari";
 				TargetAttributes = {
 					22B1758B1A06BD35004904C5 = {
@@ -204,7 +203,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				22B175B11A06BDBA004904C5 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -428,6 +426,7 @@
 				22B175A51A06BD36004904C5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		22B175A61A06BD36004904C5 /* Build configuration list for PBXNativeTarget "Tests" */ = {
 			isa = XCConfigurationList;
@@ -436,6 +435,7 @@
 				22B175A81A06BD36004904C5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

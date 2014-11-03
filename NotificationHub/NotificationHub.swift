@@ -7,8 +7,9 @@ class Notification<T> : Equatable {
   private(set) weak var sender:AnyObject?
   private let closure:NotificationClosure
   private(set) var userInfo:T?
+  private weak var hub:NotificationHub<T>?
 
-  private init(name:String, sender:AnyObject?, closure:NotificationClosure) {
+  private init(hub:NotificationHub<T>, name:String, sender:AnyObject?, closure:NotificationClosure) {
     self.name = name
     self.closure = closure
     self.sender = sender
@@ -16,6 +17,10 @@ class Notification<T> : Equatable {
   final private func execute() -> Bool {
     self.closure(self)
     return true
+  }
+  
+  final func remove() {
+    self.hub?.removeNotification(self)
   }
   
   
@@ -73,7 +78,7 @@ class NotificationHub<T> {
   }
   
   func addObserverForName(name: String, sender: AnyObject? = nil, block: (Notification<T>) -> Void) -> Notification<T> {
-    let notification = Notification(name: name, sender: sender, closure: block)
+    let notification = Notification(hub:self, name: name, sender: sender, closure: block)
     
     if let sender: AnyObject = sender {
       if var notifications = self.observersKeyedNameForSender(sender)?[name] {notifications.append(notification) }
