@@ -10,12 +10,13 @@ class Notification<T> : Equatable {
   private weak var hub:NotificationHub<T>?
 
   private init(hub:NotificationHub<T>, name:String, sender:AnyObject?, closure:NotificationClosure) {
+    self.hub = hub
     self.name = name
     self.closure = closure
     self.sender = sender
   }
   
-  final private func executeWithUserInfo(userInfo:T?) -> Bool {
+  final func fireUserInfo(userInfo:T?) -> Bool {
     self.userInfo = userInfo
     self.closure(self)
     self.userInfo = nil
@@ -23,7 +24,10 @@ class Notification<T> : Equatable {
   }
   
   final func remove() {
+    self.userInfo = nil
     self.hub?.removeNotification(self)
+    self.hub = nil
+    self.sender = nil
   }
   
   
@@ -98,34 +102,26 @@ class NotificationHub<T> {
   
 
   func postNotification(notification: Notification<T>) -> Bool {
-    if contains(self.notificationsUnsorted, notification) { return notification.executeWithUserInfo(nil) }
+    if contains(self.notificationsUnsorted, notification) { return notification.fireUserInfo(nil) }
     else { return false }
-    
-    //if let n = (self.notificationsUnsorted.filter { $0 === notification }).first { return n.execute() }
-    //else { return false }
   }
   
   func postNotificationName(name: String, sender: AnyObject? = nil, userInfo:T? = nil) {
     var notifications: [Notification<T>]?
     
-    if let sender: AnyObject = sender {
-      notifications = self.observersKeyedNameForSender(sender)?[name]
-    }
-//    else  {
-//      notifications = self.notificationsKeyedName[name]
-//    }
+    if let sender: AnyObject = sender { notifications = self.observersKeyedNameForSender(sender)?[name] }
+    //else  { notifications = self.notificationsKeyedName[name] }
 
     notifications = notifications ?? self.notificationsKeyedName[name]
 
-    if let notifications = notifications {
-      for notification in notifications { notification.executeWithUserInfo(userInfo) }
-    }
+    if let notifications = notifications {for notification in notifications { notification.fireUserInfo(userInfo) } }
     
   }
   
   func removeNotification(notification: Notification<T>) {
     let sender: AnyObject? = notification.sender
     let name = notification.name
+    
     
     if let sender: AnyObject = sender {
       if let notifications = self.observersKeyedNameForSender(sender)?[name] {
@@ -148,8 +144,7 @@ class NotificationHub<T> {
     
   }
   
-  //Remove notification with name or name & sender
-  func removeNotificationName(name:String, sender: AnyObject? = nil) {
+  func removeNotificationsName(name:String, sender: AnyObject? = nil) {
     let name = name
     let sender: AnyObject? = sender
     
@@ -159,9 +154,9 @@ class NotificationHub<T> {
         if newNotifications.isEmpty { self.notificationsKeyedSender.removeObjectForKey(sender) }
         else { self.notificationsKeyedSender.setObject(newNotifications, forKey: sender) }
       }
-      else { self.removeNotificationsName(name) }
+      else { self.removeNotificationWithName(name) }
     }
-    else { self.removeNotificationsName(name) }
+    else { self.removeNotificationWithName(name) }
     
     self.notificationsUnsorted = self.notificationsUnsorted.filter  {
       return $0.name != name && $0.sender !== sender
@@ -169,7 +164,7 @@ class NotificationHub<T> {
 
   }
   
-  func removeNotificationsName(name:String) {
+  private  func removeNotificationWithName(name:String) {
     if let notifications = self.notificationsKeyedName[name] {
       let newNotifications = notifications.filter { ($0 as Notification<T>).name != name }
       if newNotifications.isEmpty { self.notificationsKeyedName[name] = nil }
@@ -177,37 +172,19 @@ class NotificationHub<T> {
     }
   }
   
-  //Remove notifications with the name from both sender and without sender
-  func removeAllNotificationsWithName(name:String) {
+  func removeAllNotificationsName(name:String) {
     var observersKeyedName = self.notificationsKeyedSender.objectEnumerator().allObjects as [[String:[Notification<T>]]]
-    var keys = self.notificationsKeyedSender.keyEnumerator().allObjects as [AnyObject]
-    
-    var notificationsToRemove:[Notification<T>]?
-    
-    for key in keys {
-      var pairs = self.observersKeyedNameForSender(key)
-      if var pairs = pairs {
-        notificationsToRemove = pairs.removeValueForKey(name)
-        if pairs.isEmpty { self.notificationsKeyedSender.removeObjectForKey(key) }
-      }
+    observersKeyedName.append(self.notificationsKeyedName)
+    for key in observersKeyedName {
+      let notifications = key[name]
+      if let notifications = notifications { for notification in notifications { notification.remove() } }
     }
     
-    if let moreNotificationsToRemove = self.notificationsKeyedName.removeValueForKey(name) {
-
-      if let notificationsToRemove = notificationsToRemove {
-        notificationsToRemove + moreNotificationsToRemove
-      }
-   
-    }
-    
-    
-    
-//      pairs.removeValueForKey(name)
-//      if(pairs?.isEmpty) { self.observersKeyedSender.removeObjectForKey(key) }
-//      else {
-//        self.observersKeyedSender.setObject(pairs, forKey: key)
-//      }
+//    self.notificationsUnsorted = self.notificationsUnsorted.filter  {
+//      return $0.name != name && $0.sender !== sender
 //    }
+
+    
 
   }
   

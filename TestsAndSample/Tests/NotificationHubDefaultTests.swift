@@ -13,6 +13,7 @@ class NotificationHubDefaultTests: XCTestCase {
   var hub = NotificationHub<[String:Any]>()
   let notificationName = "notificationName"
   var notificationUserInfo = [String:Any]()
+  
   override func setUp() {
     super.setUp()
     self.notificationUserInfo["key"] = 5
@@ -129,7 +130,7 @@ class NotificationHubDefaultTests: XCTestCase {
     self.hub.addObserverForName(self.notificationName, sender: nil) { notification in
       didRemove = false
     }
-    self.hub.removeNotificationName(self.notificationName, sender: nil)
+    self.hub.removeNotificationsName(self.notificationName, sender: nil)
     self.hub.postNotificationName(self.notificationName, sender: nil, userInfo: nil)
     if didRemove { expectation.fulfill() }
     self.waitForExpectationsWithTimeout(1, nil)
@@ -144,7 +145,7 @@ class NotificationHubDefaultTests: XCTestCase {
     self.hub.addObserverForName(self.notificationName, sender: nil) { notification in
       didRemove = false
     }
-    self.hub.removeNotificationName(self.notificationName, sender: self)
+    self.hub.removeNotificationsName(self.notificationName, sender: self)
     self.hub.postNotificationName(self.notificationName, sender: nil, userInfo: nil)
     if didRemove { expectation.fulfill() }
     self.waitForExpectationsWithTimeout(1, nil)
@@ -158,7 +159,7 @@ class NotificationHubDefaultTests: XCTestCase {
     self.hub.addObserverForName(self.notificationName, sender: self) { notification in
       didNotRemove = true
     }
-    self.hub.removeNotificationName(self.notificationName, sender: nil)
+    self.hub.removeNotificationsName(self.notificationName, sender: nil)
     self.hub.postNotificationName(self.notificationName, sender: self, userInfo: nil)
     if didNotRemove  { expectation.fulfill() }
     self.waitForExpectationsWithTimeout(1, nil)
@@ -173,7 +174,7 @@ class NotificationHubDefaultTests: XCTestCase {
     self.hub.addObserverForName(self.notificationName, sender: self) { notification in
       didRemove = false
     }
-    self.hub.removeNotificationName(self.notificationName, sender: self)
+    self.hub.removeNotificationsName(self.notificationName, sender: self)
     self.hub.postNotificationName(self.notificationName, sender: self, userInfo: nil)
     if didRemove { expectation.fulfill() }
     self.waitForExpectationsWithTimeout(1, nil)
@@ -187,8 +188,29 @@ class NotificationHubDefaultTests: XCTestCase {
     self.hub.addObserverForName(self.notificationName, sender: self) { notification in
       didRemove = false
     }
-    self.hub.removeNotificationName(self.notificationName, sender: self)
+    self.hub.removeNotificationsName(self.notificationName, sender: self)
     self.hub.postNotificationName(self.notificationName, sender: self, userInfo: nil)
+    if didRemove { expectation.fulfill() }
+    self.waitForExpectationsWithTimeout(1, nil)
+    
+  }
+  
+  func testRemoveAllNotificationsWithName() {
+    let expectation = self.expectationWithDescription(self.notificationName)
+    
+    var didRemove = true
+    self.hub.addObserverForName(self.notificationName, sender: self) { notification in
+      didRemove = false
+    }
+    
+    self.hub.addObserverForName(self.notificationName, sender: nil) { notification in
+      didRemove = false
+    }
+
+    self.hub.removeAllNotificationsName(self.notificationName)
+    self.hub.postNotificationName(self.notificationName, sender: self, userInfo: nil)
+    self.hub.postNotificationName(self.notificationName, sender: nil, userInfo: nil)
+    
     if didRemove { expectation.fulfill() }
     self.waitForExpectationsWithTimeout(1, nil)
     

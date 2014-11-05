@@ -33,6 +33,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     NSNotificationCenter.defaultCenter().removeObserver(x, name: "x", object: nil)
     NSNotificationCenter.defaultCenter().postNotificationName("x", object: nil)
     NSNotificationCenter.defaultCenter().postNotificationName("x", object: self)
+    
+    var windowNotifications = NotificationHub<[String:NSWindow]>()
+    
+    windowNotifications.addObserverForName("Damn", sender: nil) { not in
+      print(not.userInfo)
+    }
+  
+    windowNotifications.postNotificationName("Damn", sender: nil, userInfo: ["fuck" : self.window])
+
 
   }
 
