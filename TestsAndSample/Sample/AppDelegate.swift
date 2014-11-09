@@ -36,12 +36,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     var windowNotifications = NotificationHub<[String:NSWindow]>()
     
-    windowNotifications.addObserverForName("Damn", sender: nil) { not in
+    windowNotifications.subscribeNotificationForName("Damn", sender: nil) { not in
       print(not.userInfo)
     }
   
-    windowNotifications.postNotificationName("Damn", sender: nil, userInfo: ["fuck" : self.window])
+    windowNotifications.publishNotificationName("Damn", sender: nil, userInfo: ["fuck" : self.window])
 
+    
+    NotificationHubDefault.subscribeNotificationForName("fuck", block: { notification in
+      println(notification)
+    })
+
+    NotificationHubDefault.subscribeNotificationForName("fuck", block: { notification in
+      println(notification)
+    })
+    
+    NotificationHubDefault.publishNotificationName("AFK", userInfo: ["asd" : "asd"])
+    NotificationHubDefault.publishNotificationName("AFK", sender:self)
+    NotificationHubDefault.publishNotificationName("AFK")
+    
 
   }
 
