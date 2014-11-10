@@ -16,18 +16,22 @@ class Notification<T> : Equatable {
     self.sender   = sender
   }
   
-  final func fireUserInfo(userInfo:T?) -> Bool {
+  final func publishUserInfo(userInfo:T?) -> Bool {
+    if(self.hub == nil) { return false }
+    
     self.userInfo = userInfo
     self.closure(self)
     self.userInfo = nil
     return true
   }
   
-  final func remove() {
+  final func remove() -> Bool {
+    if(self.hub == nil) { return false }
     self.userInfo = nil
     self.hub?.removeNotification(self)
     self.hub = nil
     self.sender = nil
+    return true
   }
   
   
@@ -99,7 +103,7 @@ class NotificationHub<T> {
   
 
   func publishNotification(notification: Notification<T>) -> Bool {
-    if contains(self.allNotifications, notification) { return notification.fireUserInfo(nil) }
+    if contains(self.allNotifications, notification) { return notification.publishUserInfo(nil) }
     else { return false }
   }
   
@@ -108,10 +112,9 @@ class NotificationHub<T> {
     
     if let sender: AnyObject = sender { notifications = self._observersKeyedNameForSender(sender)?[name] }
 
-
     notifications = notifications ?? self.notificationsKeyedName[name]
 
-    if let notifications = notifications { for notification in notifications { notification.fireUserInfo(userInfo) } }
+    if let notifications = notifications { for notification in notifications { notification.publishUserInfo(userInfo) } }
     return notifications?.isEmpty == false
     
   }
@@ -191,7 +194,7 @@ class NotificationHub<T> {
     self.notificationsKeyedName.removeAll(keepCapacity: false)
     self.allNotifications.removeAll(keepCapacity: false)
     self.notificationsKeyedSender.removeAllObjects()
-    return count != self.allNotifications.count
+    return count != 0
   }
   
   
