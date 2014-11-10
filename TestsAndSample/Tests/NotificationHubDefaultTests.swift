@@ -252,6 +252,38 @@ class NotificationHubDefaultTests: XCTestCase {
   }
 
   
+  func testRemoveAllNotifications() {
+    let expectation = self.expectationWithDescription(self.notificationName)
+    
+    var isRemoved = true
+    self.hub.subscribeNotificationForName(self.notificationName, sender: self) { notification in
+      isRemoved = false
+    }
+    
+    self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
+      isRemoved = false
+    }
+
+    self.hub.subscribeNotificationForName("Testing something", sender: nil) { notification in
+      isRemoved = false
+    }
+
+    let didRemove               = self.hub.removeAllNotifications()
+    let didPublishWithSelf      = self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
+    let didPublishWithOutSelf   = self.hub.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
+    let didPublishDifferentName = self.hub.publishNotificationName("Testing something", sender: nil, userInfo: nil)
+    
+    if isRemoved { expectation.fulfill() }
+    self.waitForExpectationsWithTimeout(1, nil)
+    
+    XCTAssertTrue(didRemove)
+    XCTAssertFalse(didPublishWithSelf)
+    XCTAssertFalse(didPublishWithOutSelf)
+    XCTAssertFalse(didPublishDifferentName)
+    
+  }
+
+  
   func testPostWithUserInfo() {
     let expectation = self.expectationWithDescription(self.notificationName)
 
