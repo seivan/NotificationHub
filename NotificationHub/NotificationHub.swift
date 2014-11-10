@@ -125,10 +125,12 @@ class NotificationHub<T> {
     
     
     if let sender: AnyObject = sender {
-      if let notifications = self._observersKeyedNameForSender(sender)?[name] {
+      var keyedNotifications = self._observersKeyedNameForSender(sender)
+      if let notifications = keyedNotifications?[name] {
         let newNotifications = notifications.filter { ($0 as Notification<T>) !== notification }
-        if newNotifications.isEmpty { self.notificationsKeyedSender.removeObjectForKey(sender) }
-        else { self.notificationsKeyedSender.setObject(newNotifications, forKey: sender) }
+        keyedNotifications![name] = newNotifications
+        if newNotifications.isEmpty { keyedNotifications![name] = nil }
+        self.notificationsKeyedSender.setObject(keyedNotifications!, forKey: sender)
       }
 
     }
@@ -175,7 +177,7 @@ class NotificationHub<T> {
   func removeAllNotificationsName(name:String) -> Bool {
     let originalCount = self.allNotifications.count
     
-    var observersKeyedName = self.notificationsKeyedSender.objectEnumerator().allObjects as [[String:[Notification<T>]]]
+    var observersKeyedName =  self.notificationsKeyedSender.objectEnumerator().allObjects as [[String:[Notification<T>]]]
     observersKeyedName.append(self.notificationsKeyedName)
     for key in observersKeyedName {
       let notifications = key[name]

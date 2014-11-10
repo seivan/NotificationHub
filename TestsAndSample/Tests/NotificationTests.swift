@@ -75,7 +75,7 @@ class NotificationTests: XCTestCase {
     
     let didRemove      = notification.remove()
     let didPublish     = notification.publishUserInfo(nil)
-    let didRemoveAgain = NotificationHubDefault.removeAllNotifications()
+    let didRemoveAgain = hub.removeAllNotifications()
     
     XCTAssertTrue(didRemove)
     XCTAssertFalse(didPublish)

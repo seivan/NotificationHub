@@ -112,8 +112,8 @@
 			isa = PBXGroup;
 			children = (
 				22B175AD1A06BDBA004904C5 /* Info.plist */,
-				22B175AE1A06BDBA004904C5 /* NotificationHubDefaultTests.swift */,
 				220A8EE91A0726C8006D1D83 /* CustomNotificationHubTests.swift */,
+				22B175AE1A06BDBA004904C5 /* NotificationHubDefaultTests.swift */,
 				220A8EEB1A0726D9006D1D83 /* NotificationTests.swift */,
 				22B175AF1A06BDBA004904C5 /* PerformanceTests.swift */,
 			);

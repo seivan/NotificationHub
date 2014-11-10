@@ -248,6 +248,7 @@ class NotificationHubDefaultTests: XCTestCase {
     XCTAssertTrue(didRemove)
     XCTAssertFalse(didPublishWithSelf)
     XCTAssertFalse(didPublishWithOutSelf)
+    XCTAssertFalse(self.hub.removeAllNotificationsName(self.notificationName))
     
   }
 
@@ -280,6 +281,7 @@ class NotificationHubDefaultTests: XCTestCase {
     XCTAssertFalse(didPublishWithSelf)
     XCTAssertFalse(didPublishWithOutSelf)
     XCTAssertFalse(didPublishDifferentName)
+    XCTAssertFalse(self.hub.removeAllNotifications())
     
   }
 
