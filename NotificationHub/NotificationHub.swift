@@ -88,15 +88,28 @@ class NotificationHub<T> {
   func subscribeNotificationForName(name: String, sender: AnyObject? = nil, block: (Notification<T>) -> Void) -> Notification<T> {
     let notification = Notification(hub:self, name: name, sender: sender, closure: block)
     
+    
     if let sender: AnyObject = sender {
-      if var notifications = self._observersKeyedNameForSender(sender)?[name] {notifications.append(notification) }
+      if var keyedNotifications = self._observersKeyedNameForSender(sender) {
+        var notifications = keyedNotifications[name] ?? [Notification<T>]()
+        notifications.append(notification)
+        keyedNotifications[name] = notifications
+        self.notificationsKeyedSender.setObject(keyedNotifications, forKey: sender)
+        
+      }
       else { self.notificationsKeyedSender.setObject([name:[notification]], forKey: sender) }
     }
     else {
-      if var notifications = self.notificationsKeyedName[name] { notifications.append(notification) }
-      else { self.notificationsKeyedName[name] = [notification] }
+      if var notifications = self.notificationsKeyedName[name] {
+        notifications.append(notification)
+        self.notificationsKeyedName[name] = notifications
+      }
+      else {
+        self.notificationsKeyedName[name] = [notification]
+      }
     }
 
+    
     self.allNotifications.append(notification)
     return notification
   }
@@ -109,9 +122,9 @@ class NotificationHub<T> {
   
   func publishNotificationName(name: String, sender: AnyObject? = nil, userInfo:T? = nil) -> Bool {
     var notifications: [Notification<T>]?
-    
-    if let sender: AnyObject = sender { notifications = self._observersKeyedNameForSender(sender)?[name] }
 
+    if let sender: AnyObject = sender { notifications = self._observersKeyedNameForSender(sender)?[name] }
+    
     notifications = notifications ?? self.notificationsKeyedName[name]
 
     if let notifications = notifications { for notification in notifications { notification.publishUserInfo(userInfo) } }
@@ -149,18 +162,21 @@ class NotificationHub<T> {
   }
   
   func removeNotificationsName(name:String, sender: AnyObject? = nil) -> Bool {
-    let name = name
     let sender: AnyObject? = sender
-    
+
     if let sender: AnyObject = sender {
-      if let notifications = self._observersKeyedNameForSender(sender)?[name] {
+      var keyedNotifications = self._observersKeyedNameForSender(sender)
+      if let notifications = keyedNotifications?[name] {
         let newNotifications = notifications.filter { ($0 as Notification<T>).name != name }
-        if newNotifications.isEmpty { self.notificationsKeyedSender.removeObjectForKey(sender) }
-        else { self.notificationsKeyedSender.setObject(newNotifications, forKey: sender) }
+        keyedNotifications![name] = newNotifications
+        if newNotifications.isEmpty { keyedNotifications![name] = nil }
+        self.notificationsKeyedSender.setObject(keyedNotifications!, forKey: sender)
       }
       else { self._removeNotificationWithName(name) }
     }
-    else { self._removeNotificationWithName(name) }
+    else {
+      self._removeNotificationWithName(name)
+    }
     
     let filteredNotifications = self.allNotifications.filter  {
       if sender != nil { return ($0.sender !== sender && $0.name != name) }
@@ -209,7 +225,7 @@ class NotificationHub<T> {
   }
   
 
-  final private func _observersKeyedNameForSender(sender:AnyObject) -> [String:[Notification<T>]]? {
+  final func _observersKeyedNameForSender(sender:AnyObject) -> [String:[Notification<T>]]? {
     return self.notificationsKeyedSender.objectForKey(sender) as [String:[Notification<T>]]?
   }
 
