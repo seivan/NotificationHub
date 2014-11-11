@@ -130,11 +130,12 @@ class NotificationHub<T> {
       }
     }
     
-    if 
-    notifications = notifications ??  self.notificationsKeyedName[name]
+    if let notificationsKeyed = self.notificationsKeyedName[name] {
+      notifications.extend(notificationsKeyed)
+    }
 
-    if let notifications = notifications { for notification in notifications { notification.publishUserInfo(userInfo) } }
-    return notifications?.isEmpty == false
+    for notification in notifications { notification.publishUserInfo(userInfo) }
+    return notifications.isEmpty == false
     
   }
   
