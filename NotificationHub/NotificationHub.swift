@@ -121,11 +121,17 @@ class NotificationHub<T> {
   }
   
   func publishNotificationName(name: String, sender: AnyObject? = nil, userInfo:T? = nil) -> Bool {
-    var notifications: [Notification<T>]?
-
-    if let sender: AnyObject = sender { notifications = self._observersKeyedNameForSender(sender)?[name] }
+    var notifications = [Notification<T>]()
     
-    notifications = notifications ?? self.notificationsKeyedName[name]
+    
+    if let sender: AnyObject = sender {
+      if let notificationsWithSender = self._observersKeyedNameForSender(sender)?[name] {
+        notifications.extend(notificationsWithSender)
+      }
+    }
+    
+    if 
+    notifications = notifications ??  self.notificationsKeyedName[name]
 
     if let notifications = notifications { for notification in notifications { notification.publishUserInfo(userInfo) } }
     return notifications?.isEmpty == false

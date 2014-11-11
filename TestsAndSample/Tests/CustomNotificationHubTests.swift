@@ -29,6 +29,7 @@ class CustomNotificationHubTests: XCTestCase {
     return didPublish
   }
   
+  
   func testPublish() {
     let expectation = self.expectationWithDescription(self.notificationName)
     let notification = self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { not in
@@ -79,34 +80,29 @@ class CustomNotificationHubTests: XCTestCase {
 
   }
   
-  func testPublishSeveralNotifications() {
+  func testPublishSeveralNotificationsWithoutSender() {
     self.subscribeAndResetCounter()
-
     for name in 0..<100 { self.publish(notificationName: String(name)) }
     XCTAssertEqual(self.counter, 100)
   }
   
   func testPublishSeveralNotificationsWithSender() {
     self.subscribeAndResetCounter()
-    
     for name in 0..<100 { self.publish(notificationName: String(name), sender:self) }
-    XCTAssertEqual(self.counter, 100)
+    XCTAssertEqual(self.counter, 200)
   }
 
   func testRemoveNotifications() {
     self.subscribeAndResetCounter()
-    
-    println(self.hub._observersKeyedNameForSender(self))
-    
-    for i in 0..<100 {
-      self.hub.removeNotificationsName(String(i), sender: nil)
-    }
-    
-    println(self.hub._observersKeyedNameForSender(self))
-    
-    for i in 0..<100 {
-      self.publish(notificationName: String(i), sender:self)
-    }
+    for i in 0..<100 { self.hub.removeNotificationsName(String(i), sender: nil) }
+    for i in 0..<100 { self.publish(notificationName: String(i), sender:self) }
+    XCTAssertEqual(self.counter, 100)
+  }
+
+  func testRemoveNotificationsSender() {
+    self.subscribeAndResetCounter()
+    for i in 0..<100 { self.hub.removeNotificationsName(String(i), sender: self) }
+    for i in 0..<100 { self.publish(notificationName: String(i), sender:self) }
     XCTAssertEqual(self.counter, 100)
   }
 

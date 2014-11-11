@@ -17,21 +17,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   func applicationDidFinishLaunching(aNotification: NSNotification) {
     // Insert code here to initialize your application
     
-    var x = NSNotificationCenter.defaultCenter().addObserverForName("test", object: nil, queue: nil) { n in
-      println("WITHOUT");
-    }
-
-        NSNotificationCenter.defaultCenter().removeObserver(x, name: "test", object: nil)
-    NSNotificationCenter.defaultCenter().postNotificationName("test", object: nil)
-    NSNotificationCenter.defaultCenter().postNotificationName("test", object: self)
     
 
-    x = NSNotificationCenter.defaultCenter().addObserverForName("x", object: self, queue: nil) { n in
-      println("WITH");
+    var x = NSNotificationCenter.defaultCenter().addObserverForName("x", object: nil, queue: nil) { n in
+      println("WITHOUT NIL");
     }
-    
-    NSNotificationCenter.defaultCenter().removeObserver(x, name: "x", object: nil)
-    NSNotificationCenter.defaultCenter().postNotificationName("x", object: nil)
+
+    var p = NSNotificationCenter.defaultCenter().addObserverForName("x", object: self, queue: nil) { n in
+      println("WITH NIL");
+    }
+
+//    NSNotificationCenter.defaultCenter().removeObserver(x, name: "x", object: nil)
+//    NSNotificationCenter.defaultCenter().postNotificationName("x", object: nil)
     NSNotificationCenter.defaultCenter().postNotificationName("x", object: self)
     
 //    var windowNotifications = NotificationHub<[String:NSWindow]>()
