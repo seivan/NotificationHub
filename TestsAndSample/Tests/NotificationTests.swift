@@ -80,7 +80,7 @@ class NotificationTests: XCTestCase {
     XCTAssertTrue(didRemove)
     XCTAssertFalse(didPublish)
     XCTAssertTrue(notification.userInfo == nil)
-    XCTAssertNil(notification.sender)
+    XCTAssertNotNil(notification.sender)
     XCTAssertFalse(didRemoveAgain)
     
     if(isRemoved) { expectation.fulfill() }

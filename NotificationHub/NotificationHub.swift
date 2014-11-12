@@ -9,7 +9,7 @@ class Notification<T> : Equatable {
   
   private weak var hub:NotificationHub<T>?
 
-  private init(hub:NotificationHub<T>, name:String, sender:AnyObject?, closure:NotificationClosure) {
+  init(hub:NotificationHub<T>, name:String, sender:AnyObject?, closure:NotificationClosure) {
     self.hub      = hub
     self.name     = name
     self.closure  = closure
@@ -30,7 +30,6 @@ class Notification<T> : Equatable {
     self.userInfo = nil
     self.hub?.removeNotification(self)
     self.hub = nil
-    self.sender = nil
     return true
   }
   
@@ -85,11 +84,16 @@ class NotificationHub<T> {
   init() {}
   
   
+  
   func subscribeNotificationForName(name: String, sender: AnyObject? = nil, block: (Notification<T>) -> Void) -> Notification<T> {
     let notification = Notification(hub:self, name: name, sender: sender, closure: block)
+    return self.subscribeNotification(notification)
+  }
+  
+  private func subscribeNotification(notification:Notification<T>) -> Notification<T> {
+    let name = notification.name
     
-    
-    if let sender: AnyObject = sender {
+    if let sender: AnyObject = notification.sender {
       if var keyedNotifications = self._observersKeyedNameForSender(sender) {
         var notifications = keyedNotifications[name] ?? [Notification<T>]()
         notifications.append(notification)
@@ -108,15 +112,15 @@ class NotificationHub<T> {
         self.notificationsKeyedName[name] = [notification]
       }
     }
-
+    
     
     self.allNotifications.append(notification)
     return notification
   }
-  
 
-  func publishNotification(notification: Notification<T>) -> Bool {
-    if contains(self.allNotifications, notification) { return notification.publishUserInfo(nil) }
+  func publishNotification(notification: Notification<T>, userInfo:T? = nil) -> Bool {
+    if(notification.hub == nil) { self.subscribeNotification(notification)  }
+    if contains(self.allNotifications, notification) { return notification.publishUserInfo(userInfo) }
     else { return false }
   }
   
@@ -130,11 +134,19 @@ class NotificationHub<T> {
       }
     }
     
-    if let notificationsKeyed = self.notificationsKeyedName[name] {
+    var notificationsKeyed = self.notificationsKeyedName[name]
+    if let notificationsKeyed = notificationsKeyed  {
       notifications.extend(notificationsKeyed)
+      for not in notificationsKeyed { not.sender = sender}
     }
 
+
     for notification in notifications { notification.publishUserInfo(userInfo) }
+    if let notificationsKeyed = notificationsKeyed  {
+      notifications.extend(notificationsKeyed)
+      for not in notificationsKeyed { not.sender = nil}
+    }
+
     return notifications.isEmpty == false
     
   }

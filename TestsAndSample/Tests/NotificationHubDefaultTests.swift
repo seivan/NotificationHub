@@ -71,7 +71,8 @@ class NotificationHubDefaultTests: XCTestCase {
     self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
-      XCTAssertNil(notification.sender)
+      XCTAssertNotNil(notification.sender)
+      XCTAssertEqual(self, notification.sender! as NotificationHubDefaultTests)
       XCTAssertTrue(notification.userInfo == nil)
       expectation.fulfill()
     }
@@ -115,7 +116,7 @@ class NotificationHubDefaultTests: XCTestCase {
 
   }
   
-  func testPostDefaultNotificationsWithSender() {
+  func testPostTwoDefaultNotificationWithSender() {
 
     let expectationFirst = self.expectationWithDescription(self.notificationName)
     self.hub.subscribeNotificationForName(self.notificationName, sender: self) { notification in
