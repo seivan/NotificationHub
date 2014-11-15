@@ -51,6 +51,17 @@
                BlueprintName = "Tests"
                ReferencedContainer = "container:TestsAndSample.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "CustomNotificationHubTests">
+               </Test>
+               <Test
+                  Identifier = "NotificationHubDefaultTests">
+               </Test>
+               <Test
+                  Identifier = "NotificationTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
       <MacroExpansion>

@@ -76,6 +76,7 @@ get { return NotificationHub<[String:Any]>.defaultHub }
 
 
 class NotificationHub<T>  {
+  final private(set) var notifications    = [Notification<T>]()
   
   final private(set) var allNotifications    = [Notification<T>]()
   final private var notificationsKeyedName   = [String:[Notification<T>]]()
@@ -91,7 +92,32 @@ class NotificationHub<T>  {
   }
   
   init() {}
+
   
+  func X_subscribeNotificationForName(name: String, sender: AnyObject? = nil, handler: (Notification<T>) -> Void) -> Notification<T> {
+    let notification = Notification(hub:self, name: name, sender: sender, handler: handler)
+    return self.X_subscribeNotification(notification)
+  }
+
+  func X_subscribeNotification(notification:Notification<T>) -> Notification<T> {
+    self.notifications.append(notification)
+    return notification
+  }
+  
+  
+  func X_publishNotificationName(name: String, sender: AnyObject? = nil, userInfo:T? = nil) -> Bool {
+    
+    var didPublish = false
+    for notification in self.notifications {
+      if notification.name == name && notification.sender === sender {
+        notification.publishUserInfo(userInfo)
+        didPublish = true
+      }
+    }
+    return didPublish    
+  }
+
+
   
   
   func subscribeNotificationForName(name: String, sender: AnyObject? = nil, handler: (Notification<T>) -> Void) -> Notification<T> {
