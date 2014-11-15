@@ -16,6 +16,7 @@
 		22B175B31A06BDBA004904C5 /* PerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B175AF1A06BDBA004904C5 /* PerformanceTests.swift */; };
 		22B175B51A06BEB3004904C5 /* NotificationHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225F742619D8BEDF007F31C5 /* NotificationHub.swift */; };
 		22B175B61A06BEB3004904C5 /* NotificationHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225F742619D8BEDF007F31C5 /* NotificationHub.swift */; };
+		22C65EA31A16E4BE00EFCADB /* GenericNotificationHubTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C65EA21A16E4BE00EFCADB /* GenericNotificationHubTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,6 +42,7 @@
 		22B175AD1A06BDBA004904C5 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		22B175AE1A06BDBA004904C5 /* NotificationHubDefaultTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationHubDefaultTests.swift; sourceTree = "<group>"; };
 		22B175AF1A06BDBA004904C5 /* PerformanceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PerformanceTests.swift; sourceTree = "<group>"; };
+		22C65EA21A16E4BE00EFCADB /* GenericNotificationHubTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenericNotificationHubTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +118,7 @@
 				22B175AE1A06BDBA004904C5 /* NotificationHubDefaultTests.swift */,
 				220A8EEB1A0726D9006D1D83 /* NotificationTests.swift */,
 				22B175AF1A06BDBA004904C5 /* PerformanceTests.swift */,
+				22C65EA21A16E4BE00EFCADB /* GenericNotificationHubTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -232,6 +235,7 @@
 				22B175B31A06BDBA004904C5 /* PerformanceTests.swift in Sources */,
 				22B175B21A06BDBA004904C5 /* NotificationHubDefaultTests.swift in Sources */,
 				220A8EEA1A0726C8006D1D83 /* CustomNotificationHubTests.swift in Sources */,
+				22C65EA31A16E4BE00EFCADB /* GenericNotificationHubTests.swift in Sources */,
 				22B175B51A06BEB3004904C5 /* NotificationHub.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

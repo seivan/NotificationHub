@@ -6,16 +6,29 @@ class Notification<T> : Equatable {
   private(set) weak var sender:AnyObject?
   private(set) var userInfo:T?
   private let closure:NotificationClosure
+
   
   private weak var hub:NotificationHub<T>?
+  private weak var hubX:NotificationCenter?
 
-  init(hub:NotificationHub<T>, name:String, sender:AnyObject?, closure:NotificationClosure) {
-    self.hub      = hub
+  
+  init(name:String, sender:AnyObject?, handler:NotificationClosure) {
     self.name     = name
-    self.closure  = closure
+    self.closure  = handler
     self.sender   = sender
+
   }
   
+  private convenience init(hub:NotificationHub<T>, name:String, sender:AnyObject?, handler:NotificationClosure) {
+    self.init(name:name, sender:sender, handler:handler)
+    self.hub = hub
+  }
+
+  private convenience init(hub:NotificationCenter, name:String, sender:AnyObject?, handler:NotificationClosure) {
+    self.init(name:name, sender:sender, handler:handler)
+    self.hubX = hub
+  }
+
   final func publishUserInfo(userInfo:T?) -> Bool {
     if(self.hub == nil) { return false }
     
@@ -56,8 +69,11 @@ func ==<T>(lhs: Notification<T>, rhs: Notification<T>) -> Bool {
 //}
 
 private struct Static {
-  static var onceToken : dispatch_once_t = 0
+  static var instanceToken : dispatch_once_t = 0
+  static var hubToken : dispatch_once_t = 0
   static var instance : NotificationHub<[String:Any]>? = nil
+  static var hub : NotificationCenter? = nil
+
 }
 
 
@@ -66,7 +82,62 @@ get { return NotificationHub<[String:Any]>.defaultHub }
 }
 
 
-class NotificationHub<T> {
+class NotificationCenter {
+  final private(set) var notifications    = [AnyObject]()
+
+  class var defaultHub:NotificationCenter{
+    dispatch_once(&Static.hubToken) {
+      Static.hub = NotificationCenter()
+    }
+    return Static.hub!
+  }
+
+  init() {}
+  func subscribeNotificationForName<T>(name: String, sender: AnyObject? = nil, type:T, handler: (Notification<T>) -> Void) -> Notification<T> {
+    let notification = Notification(hub:self, name: name, sender: sender, handler: handler)
+    return self.subscribeNotification(notification)
+  }
+  
+  func subscribeNotification<T>(notification:Notification<T>) -> Notification<T> {
+    if notification.hub != nil && notification.hub !== self { notification.hubX?.removeNotification(notification) }
+    notification.hubX = self
+    self.notifications.append(notification)
+    return notification
+  }
+  
+  func removeNotification<T>(notification: Notification<T>) -> Bool {
+    var notifications = self.notifications as [Notification<T>]
+    if let index = find(notifications, notification) {
+      self.notifications.removeAtIndex(index)
+      return true
+    }
+    else { return false }
+    
+  }
+  
+  func publishNotificationName<T>(name: String, sender: AnyObject? = nil, userInfo:T? = nil) -> Bool {
+    var notifications = self.notifications
+    
+    var didPublish = false
+    for notification in self.notifications {
+      if notification is Notification<T> {
+      if name == notification.name && sender === notification.sender {
+        (notification as Notification<T>).publishUserInfo(userInfo)
+        didPublish = true
+        }
+      }
+    }
+    return didPublish
+    
+    
+  }
+
+
+
+
+}
+
+class NotificationHub<T>  {
   
   final private(set) var allNotifications    = [Notification<T>]()
   final private var notificationsKeyedName   = [String:[Notification<T>]]()
@@ -75,7 +146,7 @@ class NotificationHub<T> {
     valueOptions: NSPointerFunctionsStrongMemory)
 
   private class var defaultHub:NotificationHub<[String:Any]> {
-    dispatch_once(&Static.onceToken) {
+    dispatch_once(&Static.instanceToken) {
       Static.instance = NotificationHub<[String:Any]>()
     }
     return Static.instance!
@@ -85,12 +156,15 @@ class NotificationHub<T> {
   
   
   
-  func subscribeNotificationForName(name: String, sender: AnyObject? = nil, block: (Notification<T>) -> Void) -> Notification<T> {
-    let notification = Notification(hub:self, name: name, sender: sender, closure: block)
+  func subscribeNotificationForName(name: String, sender: AnyObject? = nil, handler: (Notification<T>) -> Void) -> Notification<T> {
+    let notification = Notification(hub:self, name: name, sender: sender, handler: handler)
     return self.subscribeNotification(notification)
   }
   
-  private func subscribeNotification(notification:Notification<T>) -> Notification<T> {
+  func subscribeNotification(notification:Notification<T>) -> Notification<T> {
+    if notification.hub != nil && notification.hub !== self { notification.hub?.removeNotification(notification) }
+    notification.hub = self
+    
     let name = notification.name
     
     if let sender: AnyObject = notification.sender {
@@ -119,8 +193,7 @@ class NotificationHub<T> {
   }
 
   func publishNotification(notification: Notification<T>, userInfo:T? = nil) -> Bool {
-    if(notification.hub == nil) { self.subscribeNotification(notification)  }
-    if contains(self.allNotifications, notification) { return notification.publishUserInfo(userInfo) }
+    if notification.hub === self && contains(self.allNotifications, notification) { return notification.publishUserInfo(userInfo) }
     else { return false }
   }
   

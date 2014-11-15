@@ -24,15 +24,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 //      println(n.object)
 //    }
 
+    var w = NSNotification(name: "x", object: self, userInfo: nil)
     var p = NSNotificationCenter.defaultCenter().addObserverForName("x", object: self, queue: nil) { n in
       println("WITH NIL");
       println(n.object)
     }
-    var q = NSNotification(name: "x", object: nil, userInfo: nil)
+//    var q = NSNotification(name: "x", object: nil, userInfo: nil)
 
 //    NSNotificationCenter.defaultCenter().removeObserver(x, name: "x", object: nil)
 //    NSNotificationCenter.defaultCenter().postNotificationName("x", object: nil)
-    NSNotificationCenter.defaultCenter().postNotification(q)
+    NSNotificationCenter.defaultCenter().postNotification(w)
     
 //    var windowNotifications = NotificationHub<[String:NSWindow]>()
 //    

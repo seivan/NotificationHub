@@ -12,6 +12,17 @@ import XCTest
 class NotificationTests: XCTestCase {
   let notificationName = "notificationName"
 
+  func testInit() {
+    let notification = Notification<String>(name: self.notificationName, sender: self) { not in
+      
+    }
+    XCTAssertEqual(self.notificationName, notification.name)
+    XCTAssertTrue(self === notification.sender)
+    XCTAssertNil(notification.userInfo)
+  }
+  
+
+  
   func testName() {
     let notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: nil) { not in
       
@@ -88,6 +99,7 @@ class NotificationTests: XCTestCase {
     
     
   }
+  
 
   
 
