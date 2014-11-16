@@ -173,7 +173,9 @@ class NotificationHub<T>  {
       if let sender: AnyObject = sender {
         for notification in notifications {
           let not:Notification = notification as Notification<T>
-          if not.sender === sender { notifications.removeObject(not) }
+          if not.sender === sender {
+            notifications.removeObject(not)
+          }
         }
       }
       else {
