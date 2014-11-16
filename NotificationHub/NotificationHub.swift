@@ -153,14 +153,15 @@ class NotificationHub<T>  {
   
   func removeNotification(notification: Notification<T>) -> Bool {
     if notification.hub !== self { return false }
+
     let name = notification.name
-    
     var notifications = self.notifications[name] as? NSMutableArray
-//    let count = notifications?.count
+
     notifications?.removeObject(notification)
     
-    
-//    return notifications?.count != count
+    if notifications?.count == 0  { self.notifications.removeObjectForKey(name) }
+    notification.hub = nil
+
     return true
   }
   
@@ -170,22 +171,13 @@ class NotificationHub<T>  {
     let preCount = notifications?.count
     
     if let notifications = notifications {
-      if let sender: AnyObject = sender {
-        for notification in notifications {
-          let not:Notification = notification as Notification<T>
-          if not.sender === sender {
-            notifications.removeObject(not)
-          }
+      for notification in notifications {
+        let not:Notification = notification as Notification<T>
+        if not.sender == nil || not.sender === sender {
+          notifications.removeObject(not)
+          not.hub = nil
         }
       }
-      else {
-        for notification in notifications {
-          let not:Notification = notification as Notification<T>
-          if not.sender == nil { notifications.removeObject(not) }
-        }
-        
-      }
-
     }
     
     let postCount = notifications?.count
@@ -208,7 +200,7 @@ class NotificationHub<T>  {
   func removeAllNotifications() -> Bool {
     var count = self.notifications.count
     self.notifications.removeAllObjects()
-    return count != 0
+    return count > 0
   }
 
 
