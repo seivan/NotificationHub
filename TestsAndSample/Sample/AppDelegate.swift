@@ -37,11 +37,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
 //    var windowNotifications = NotificationHub<[String:NSWindow]>()
 //    
-//    windowNotifications.subscribeNotificationForName("Damn", sender: nil) { not in
+//    windowNotifications.X_subscribeNotificationForName("Damn", sender: nil) { not in
 //      print(not.userInfo)
 //    }
-//  
-//    windowNotifications.publishNotificationName("Damn", sender: nil, userInfo: ["fuck" : self.window])
+//
+//    windowNotifications.X_publishNotificationName("Damn", sender: nil, userInfo: ["fuck" : self.window])
 //
 //    
 //    NotificationHubDefault.subscribeNotificationForName("fuck", block: { notification in

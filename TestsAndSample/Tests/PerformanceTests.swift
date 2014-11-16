@@ -14,7 +14,7 @@ class PerformanceTests: XCTestCase {
   var hub = NotificationHub<[String:String]>()
   var center = NSNotificationCenter()
   let limit = 1000
-  let recursiveLimit = 200
+  let recursiveLimit = 100
   
   override func setUp() {
     super.setUp()
@@ -25,102 +25,60 @@ class PerformanceTests: XCTestCase {
   }
   //////////////////////////////////////////////////////////////////////////
   
-  func testExperimentalSubscribeSeveral() {
-    
-    
-    self.measureBlock() {
-      for i in 0...self.recursiveLimit {
-        for j in 0...self.recursiveLimit {
-          self.X_hub.X_subscribeNotificationForName(String(j), sender: nil) { not in}
-        }
-      }
-      return
-    }
-    
-  }
-  
-  func testSubscribeSeveral() {
-    
-    
-    self.measureBlock() {
-      for i in 0...self.recursiveLimit {
-        for j in 0...self.recursiveLimit {
-          self.hub.subscribeNotificationForName(String(j), sender: nil) { not in}
-        }
-      }
-      return
-    }
-    
-  }
+  func testSubscribeWithoutCache() {
+    self.measureBlock() { for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+      self.X_hub.X_subscribeNotificationForName(String(j), sender: nil) { not in}
+      }};return}}
   
   
-  func testAppleSubscribeSeveral() {
-    
-    
+  func testSubscribeWithCache() {
+    self.measureBlock() { for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+      self.hub.subscribeNotificationForName(String(j), sender: nil) { not in}
+      }}; return }}
+  
+  
+  func testAppleSubscribe() {
     self.measureBlock() {
-      for i in 0...self.recursiveLimit {
-        for j in 0...self.recursiveLimit {
-          self.center.addObserverForName(String(j), object: nil, queue: nil) { not in }
-        }
-      }
-      return
-    }
-    
-  }
+      for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+        self.center.addObserverForName(String(j), object: nil, queue: nil) { not in }
+        }}; return }}
 
   
   ////////////////////////////////////////////////////////////////////////
   
-  func testExperimentalPublishSeverals() {
-    
-    for i in 0...self.recursiveLimit {
-      for j in 0...self.recursiveLimit {
+  
+  func testPublishWithoutCache() {
+    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
         self.X_hub.X_subscribeNotificationForName(String(j), sender: nil) { not in}
-      }
-    }
+      }}
     
-    self.measureBlock() {
-      for i in 0...self.recursiveLimit {
+    self.measureBlock() { for i in 0...self.recursiveLimit {
         self.X_hub.X_publishNotificationName(String(i))
-      }
-      return
-    }
+      }; return }
     
   }
   
-  func testPublishSeverals() {
-    
-    for i in 0...self.recursiveLimit {
-      for j in 0...self.recursiveLimit {
+  func testPublishWithCache() {
+    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
         self.hub.subscribeNotificationForName(String(j), sender: nil) { not in}
-      }
-    }
+      }}
     
     self.measureBlock() {
       for i in 0...self.recursiveLimit {
         self.hub.publishNotificationName(String(i))
-      }
-      return
-    }
-    
+      }; return }
   }
 
 
-  func testApplePublishSeverals() {
-    
-    for i in 0...self.recursiveLimit {
-      for j in 0...self.recursiveLimit {
+  func testApplePublish() {
+    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
         self.center.addObserverForName(String(j), object: nil, queue: nil) { not in }
-      }
-    }
+      }}
     
     self.measureBlock() {
       for i in 0...self.recursiveLimit {
         self.center.postNotificationName(String(i), object: nil, userInfo:nil)
-      }
-      return
-    }
-    
+      }; return }
   }
   
   

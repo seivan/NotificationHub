@@ -44,6 +44,21 @@ class CustomNotificationHubTests: XCTestCase {
     XCTAssertTrue(notification.userInfo == nil)
     XCTAssertTrue(didPublish)
   }
+  
+  func testSubscribe() {
+    var expectationOne = self.expectationWithDescription(self.notificationName)
+    var expectationTwo = self.expectationWithDescription(self.notificationName)
+    self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { not in
+     expectationOne.fulfill()
+    }
+    self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { not in
+      expectationTwo.fulfill()
+    }
+    
+    self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
+    self.waitForExpectationsWithTimeout(1.0, nil)
+
+  }
 
   func testRemoveWithName() {
     self.subscribe()
@@ -105,27 +120,10 @@ class CustomNotificationHubTests: XCTestCase {
     for i in 0..<100 { self.publish(notificationName: String(i), sender:self) }
     XCTAssertEqual(self.counter, 100)
   }
+  
+  
 
   
-//    for name in 0..<100 {
-//      self.publish(name: String(name))
-//    }
-//    XCTAssertEqual(counter, 100)
-//
-//    
-//    for name in 0..<100 {
-//      self.hub.removeNotificationsName(String(name), sender: self)
-//    }
-//
-//    counter = 0
-//    for name in 0..<100 {
-//      self.publish(name: String(name))
-//    }
-//
-//    XCTAssertEqual(counter, 100)
-//    
-//    let didRemove = self.hub.removeAllNotifications()
-
   
 
 
