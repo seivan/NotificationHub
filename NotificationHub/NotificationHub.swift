@@ -94,12 +94,12 @@ class NotificationHub<T>  {
   init() {}
 
   
-  func X_subscribeNotificationForName(name: String, sender: AnyObject? = nil, handler: (Notification<T>) -> Void) -> Notification<T>? {
+  func subscribeNotificationForName(name: String, sender: AnyObject? = nil, handler: (Notification<T>) -> Void) -> Notification<T> {
     let notification = Notification(hub:self, name: name, sender: sender, handler: handler)
-    return self.X_subscribeNotification(notification)
+    return self.subscribeNotification(notification)
   }
 
-  func X_subscribeNotification(notification:Notification<T>) -> Notification<T> {
+  func subscribeNotification(notification:Notification<T>) -> Notification<T> {
     if notification.hub != nil && notification.hub !== self { notification.hub?.removeNotification(notification) }
     notification.hub = self
 
@@ -115,32 +115,43 @@ class NotificationHub<T>  {
   }
   
 
-  func X_publishNotificationName(name: String, sender: AnyObject? = nil, userInfo:T? = nil) -> Bool {
+  func publishNotificationName(name: String, sender: AnyObject? = nil, userInfo:T? = nil) -> Bool {
     
+    var didPublish = false
     var notifications = self.notifications[name] as? NSMutableArray
     if let notifications = notifications {
-      for notification in notifications {
-        let not:Notification = notification as Notification<T>
-        if sender != nil || notification.sender === sender {
-          not.publishUserInfo(userInfo)
+      if sender != nil {
+        for notification in notifications {
+          let not:Notification = notification as Notification<T>
+          if  notification.sender === sender { didPublish = not.publishUserInfo(userInfo) }
+          else if notification.sender == nil {
+            not.sender = sender
+            didPublish = not.publishUserInfo(userInfo)
+            not.sender = nil
+          }
         }
-        else {
-          not.publishUserInfo(userInfo)
+      }
+      else {
+        for notification in notifications {
+          let not:Notification = notification as Notification<T>
+          if not.sender == nil {
+            didPublish = not.publishUserInfo(userInfo)
+          }
         }
       }
     }
     
     
-    return notifications?.count > 0
+    return didPublish
   }
 
   
-  func X_publishNotification(notification: Notification<T>, userInfo:T? = nil) -> Bool {
+  func publishNotification(notification: Notification<T>, userInfo:T? = nil) -> Bool {
     if (notification.hub === self) { return notification.publishUserInfo(userInfo) }
     else { return false }
   }
   
-  func X_removeNotification(notification: Notification<T>) -> Bool {
+  func removeNotification(notification: Notification<T>) -> Bool {
     if notification.hub !== self { return false }
     let name = notification.name
     
@@ -155,197 +166,220 @@ class NotificationHub<T>  {
   
   func removeNotificationsName(name:String, sender: AnyObject? = nil) -> Bool {
 
-    
     var notifications = self.notifications[name] as? NSMutableArray
-    
-    
+    let preCount = notifications?.count
     
     if let notifications = notifications {
       if let sender: AnyObject = sender {
         for notification in notifications {
           let not:Notification = notification as Notification<T>
+          if not.sender === sender { notifications.removeObject(not) }
         }
       }
       else {
+        for notification in notifications {
+          let not:Notification = notification as Notification<T>
+          if not.sender == nil { notifications.removeObject(not) }
+        }
         
       }
 
     }
-
-    return true
     
-  }
-
-
-  
-  
-
-  
-  
-  func subscribeNotificationForName(name: String, sender: AnyObject? = nil, handler: (Notification<T>) -> Void) -> Notification<T> {
-    let notification = Notification(hub:self, name: name, sender: sender, handler: handler)
-    return self.subscribeNotification(notification)
-  }
-  
-  func subscribeNotification(notification:Notification<T>) -> Notification<T> {
-    if notification.hub != nil && notification.hub !== self { notification.hub?.removeNotification(notification) }
-    notification.hub = self
+    let postCount = notifications?.count
+    if postCount == 0 {self.notifications.removeObjectForKey(name) }
     
-    let name = notification.name
-    
-    if let sender: AnyObject = notification.sender {
-      if var keyedNotifications = self._observersKeyedNameForSender(sender) {
-        var notifications = keyedNotifications[name] ?? [Notification<T>]()
-        notifications.append(notification)
-        keyedNotifications[name] = notifications
-        self.notificationsKeyedSender.setObject(keyedNotifications, forKey: sender)
-        
-      }
-      else { self.notificationsKeyedSender.setObject([name:[notification]], forKey: sender) }
-    }
-    else {
-      if var notifications = self.notificationsKeyedName[name] {
-        notifications.append(notification)
-        self.notificationsKeyedName[name] = notifications
-      }
-      else {
-        self.notificationsKeyedName[name] = [notification]
-      }
-    }
-    
-    
-    self.allNotifications.append(notification)
-    return notification
-  }
 
-  func publishNotification(notification: Notification<T>, userInfo:T? = nil) -> Bool {
-    if notification.hub === self && contains(self.allNotifications, notification) { return notification.publishUserInfo(userInfo) }
-    else { return false }
-  }
-  
-  func publishNotificationName(name: String, sender: AnyObject? = nil, userInfo:T? = nil) -> Bool {
-    var notifications = [Notification<T>]()
+    return preCount != postCount
     
-    
-    if let sender: AnyObject = sender {
-      if let notificationsWithSender = self._observersKeyedNameForSender(sender)?[name] {
-        notifications.extend(notificationsWithSender)
-      }
-    }
-    
-    var notificationsKeyed = self.notificationsKeyedName[name]
-    if let notificationsKeyed = notificationsKeyed  {
-      notifications.extend(notificationsKeyed)
-      for not in notificationsKeyed { not.sender = sender}
-    }
-
-
-    for notification in notifications { notification.publishUserInfo(userInfo) }
-    if let notificationsKeyed = notificationsKeyed  {
-      notifications.extend(notificationsKeyed)
-      for not in notificationsKeyed { not.sender = nil}
-    }
-
-    return notifications.isEmpty == false
-    
-  }
-  
-  func removeNotification(notification: Notification<T>) -> Bool {
-    let sender: AnyObject? = notification.sender
-    let name = notification.name
-    
-    
-    if let sender: AnyObject = sender {
-      var keyedNotifications = self._observersKeyedNameForSender(sender)
-      if let notifications = keyedNotifications?[name] {
-        let newNotifications = notifications.filter { ($0 as Notification<T>) !== notification }
-        keyedNotifications![name] = newNotifications
-        if newNotifications.isEmpty { keyedNotifications![name] = nil }
-        self.notificationsKeyedSender.setObject(keyedNotifications!, forKey: sender)
-      }
-
-    }
-    else {
-      if let notifications = self.notificationsKeyedName[name] {
-        let newNotifications = notifications.filter { ($0 as Notification<T>) !== notification }
-        if newNotifications.isEmpty { self.notificationsKeyedName[name] = nil }
-        else { self.notificationsKeyedName[name] = newNotifications }
-      }
-    }
-    let filteredNotifications = self.allNotifications.filter  { return $0 != notification }
-    let hasRemoved = self.allNotifications.count != filteredNotifications.count
-    self.allNotifications = filteredNotifications;
-    return hasRemoved;
-    
-  }
-  
-  func removeNotificationsName(name:String, sender: AnyObject? = nil) -> Bool {
-    let sender: AnyObject? = sender
-
-    if let sender: AnyObject = sender {
-      var keyedNotifications = self._observersKeyedNameForSender(sender)
-      if let notifications = keyedNotifications?[name] {
-        let newNotifications = notifications.filter { ($0 as Notification<T>).name != name }
-        keyedNotifications![name] = newNotifications
-        if newNotifications.isEmpty { keyedNotifications![name] = nil }
-        self.notificationsKeyedSender.setObject(keyedNotifications!, forKey: sender)
-      }
-      else { self._removeNotificationWithName(name) }
-    }
-    else {
-      self._removeNotificationWithName(name)
-    }
-    
-    let filteredNotifications = self.allNotifications.filter  {
-      if sender != nil { return ($0.sender !== sender && $0.name != name) }
-      else { return ($0.sender !== sender || $0.name != name)}
-    }
-    let hasRemoved = self.allNotifications.count != filteredNotifications.count
-
-    self.allNotifications = filteredNotifications;
-    return hasRemoved;
-
-
   }
   
   func removeAllNotificationsName(name:String) -> Bool {
-    let originalCount = self.allNotifications.count
-    
-    var observersKeyedName =  self.notificationsKeyedSender.objectEnumerator().allObjects as [[String:[Notification<T>]]]
-    observersKeyedName.append(self.notificationsKeyedName)
-    for key in observersKeyedName {
-      let notifications = key[name]
-      if let notifications = notifications { for notification in notifications { notification.remove() } }
-    }
-    
-
-    let hasRemoved = self.allNotifications.count != originalCount
-
-    return hasRemoved;
-
+    let preCount = self.notifications.count
+    self.notifications.removeObjectForKey(name)
+    let postCount = self.notifications.count
+    return preCount != postCount
   }
+
+  
   
   func removeAllNotifications() -> Bool {
-    var count = self.allNotifications.count
-    self.notificationsKeyedName.removeAll(keepCapacity: false)
-    self.allNotifications.removeAll(keepCapacity: false)
-    self.notificationsKeyedSender.removeAllObjects()
+    var count = self.notifications.count
+    self.notifications.removeAllObjects()
     return count != 0
   }
+
+
+
   
-  
-  private  func _removeNotificationWithName(name:String) {
-    if let notifications = self.notificationsKeyedName[name] {
-      let newNotifications = notifications.filter { ($0 as Notification<T>).name != name }
-      if newNotifications.isEmpty { self.notificationsKeyedName[name] = nil }
-      else { self.notificationsKeyedName[name] = newNotifications }
-    }
-  }
   
 
-  final func _observersKeyedNameForSender(sender:AnyObject) -> [String:[Notification<T>]]? {
-    return self.notificationsKeyedSender.objectForKey(sender) as [String:[Notification<T>]]?
-  }
+  
+  
+//  func subscribeNotificationForName(name: String, sender: AnyObject? = nil, handler: (Notification<T>) -> Void) -> Notification<T> {
+//    let notification = Notification(hub:self, name: name, sender: sender, handler: handler)
+//    return self.subscribeNotification(notification)
+//  }
+//  
+//  func subscribeNotification(notification:Notification<T>) -> Notification<T> {
+//    if notification.hub != nil && notification.hub !== self { notification.hub?.removeNotification(notification) }
+//    notification.hub = self
+//    
+//    let name = notification.name
+//    
+//    if let sender: AnyObject = notification.sender {
+//      if var keyedNotifications = self._observersKeyedNameForSender(sender) {
+//        var notifications = keyedNotifications[name] ?? [Notification<T>]()
+//        notifications.append(notification)
+//        keyedNotifications[name] = notifications
+//        self.notificationsKeyedSender.setObject(keyedNotifications, forKey: sender)
+//        
+//      }
+//      else { self.notificationsKeyedSender.setObject([name:[notification]], forKey: sender) }
+//    }
+//    else {
+//      if var notifications = self.notificationsKeyedName[name] {
+//        notifications.append(notification)
+//        self.notificationsKeyedName[name] = notifications
+//      }
+//      else {
+//        self.notificationsKeyedName[name] = [notification]
+//      }
+//    }
+//    
+//    
+//    self.allNotifications.append(notification)
+//    return notification
+//  }
+//
+//  func publishNotification(notification: Notification<T>, userInfo:T? = nil) -> Bool {
+//    if notification.hub === self && contains(self.allNotifications, notification) { return notification.publishUserInfo(userInfo) }
+//    else { return false }
+//  }
+//  
+//  func publishNotificationName(name: String, sender: AnyObject? = nil, userInfo:T? = nil) -> Bool {
+//    var notifications = [Notification<T>]()
+//    
+//    
+//    if let sender: AnyObject = sender {
+//      if let notificationsWithSender = self._observersKeyedNameForSender(sender)?[name] {
+//        notifications.extend(notificationsWithSender)
+//      }
+//    }
+//    
+//    var notificationsKeyed = self.notificationsKeyedName[name]
+//    if let notificationsKeyed = notificationsKeyed  {
+//      notifications.extend(notificationsKeyed)
+//      for not in notificationsKeyed { not.sender = sender}
+//    }
+//
+//
+//    for notification in notifications { notification.publishUserInfo(userInfo) }
+//    if let notificationsKeyed = notificationsKeyed  {
+//      notifications.extend(notificationsKeyed)
+//      for not in notificationsKeyed { not.sender = nil}
+//    }
+//
+//    return notifications.isEmpty == false
+//    
+//  }
+//  
+//  func removeNotification(notification: Notification<T>) -> Bool {
+//    let sender: AnyObject? = notification.sender
+//    let name = notification.name
+//    
+//    
+//    if let sender: AnyObject = sender {
+//      var keyedNotifications = self._observersKeyedNameForSender(sender)
+//      if let notifications = keyedNotifications?[name] {
+//        let newNotifications = notifications.filter { ($0 as Notification<T>) !== notification }
+//        keyedNotifications![name] = newNotifications
+//        if newNotifications.isEmpty { keyedNotifications![name] = nil }
+//        self.notificationsKeyedSender.setObject(keyedNotifications!, forKey: sender)
+//      }
+//
+//    }
+//    else {
+//      if let notifications = self.notificationsKeyedName[name] {
+//        let newNotifications = notifications.filter { ($0 as Notification<T>) !== notification }
+//        if newNotifications.isEmpty { self.notificationsKeyedName[name] = nil }
+//        else { self.notificationsKeyedName[name] = newNotifications }
+//      }
+//    }
+//    let filteredNotifications = self.allNotifications.filter  { return $0 != notification }
+//    let hasRemoved = self.allNotifications.count != filteredNotifications.count
+//    self.allNotifications = filteredNotifications;
+//    return hasRemoved;
+//    
+//  }
+//  
+//  func removeNotificationsName(name:String, sender: AnyObject? = nil) -> Bool {
+//    let sender: AnyObject? = sender
+//
+//    if let sender: AnyObject = sender {
+//      var keyedNotifications = self._observersKeyedNameForSender(sender)
+//      if let notifications = keyedNotifications?[name] {
+//        let newNotifications = notifications.filter { ($0 as Notification<T>).name != name }
+//        keyedNotifications![name] = newNotifications
+//        if newNotifications.isEmpty { keyedNotifications![name] = nil }
+//        self.notificationsKeyedSender.setObject(keyedNotifications!, forKey: sender)
+//      }
+//      else { self._removeNotificationWithName(name) }
+//    }
+//    else {
+//      self._removeNotificationWithName(name)
+//    }
+//    
+//    let filteredNotifications = self.allNotifications.filter  {
+//      if sender != nil { return ($0.sender !== sender && $0.name != name) }
+//      else { return ($0.sender !== sender || $0.name != name)}
+//    }
+//    let hasRemoved = self.allNotifications.count != filteredNotifications.count
+//
+//    self.allNotifications = filteredNotifications;
+//    return hasRemoved;
+//
+//
+//  }
+//  
+//  func removeAllNotificationsName(name:String) -> Bool {
+//    let originalCount = self.allNotifications.count
+//    
+//    var observersKeyedName =  self.notificationsKeyedSender.objectEnumerator().allObjects as [[String:[Notification<T>]]]
+//    observersKeyedName.append(self.notificationsKeyedName)
+//    for key in observersKeyedName {
+//      let notifications = key[name]
+//      if let notifications = notifications { for notification in notifications { notification.remove() } }
+//    }
+//    
+//
+//    let hasRemoved = self.allNotifications.count != originalCount
+//
+//    return hasRemoved;
+//
+//  }
+//  
+//  func removeAllNotifications() -> Bool {
+//    var count = self.allNotifications.count
+//    self.notificationsKeyedName.removeAll(keepCapacity: false)
+//    self.allNotifications.removeAll(keepCapacity: false)
+//    self.notificationsKeyedSender.removeAllObjects()
+//    return count != 0
+//  }
+//  
+//  
+//  private  func _removeNotificationWithName(name:String) {
+//    if let notifications = self.notificationsKeyedName[name] {
+//      let newNotifications = notifications.filter { ($0 as Notification<T>).name != name }
+//      if newNotifications.isEmpty { self.notificationsKeyedName[name] = nil }
+//      else { self.notificationsKeyedName[name] = newNotifications }
+//    }
+//  }
+//  
+//
+//  final func _observersKeyedNameForSender(sender:AnyObject) -> [String:[Notification<T>]]? {
+//    return self.notificationsKeyedSender.objectForKey(sender) as [String:[Notification<T>]]?
+//  }
 
   
 
