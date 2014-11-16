@@ -367,7 +367,7 @@ class NotificationHubDefaultTests: XCTestCase {
     XCTAssertFalse(didPublishWithOutSelf)
     XCTAssertFalse(didPublishDifferentName)
     XCTAssertFalse(self.hub.removeAllNotifications())
-    XCTAssertTrue(self.hub.allNotifications.isEmpty)
+    XCTAssertTrue(self.hub.notifications.isEmpty)
     
   }
 
