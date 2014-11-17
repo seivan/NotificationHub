@@ -51,6 +51,11 @@
                BlueprintName = "Tests"
                ReferencedContainer = "container:TestsAndSample.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "PerformanceTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
       <MacroExpansion>

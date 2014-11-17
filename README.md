@@ -1,8 +1,8 @@
-## VectorArithmetic
+## NotificationHub<
 
 ### Overview
-Extending  ```CGPoint```, ```CGSize``` and ```CGVector``` with the protocols 
-```VectorOperatable``` &  ```VectorArithmetic```
+NSNotificationCenter replacement in Swift.
+Adds strict typing to userInfo by using generics. ```NotificationHub<[String : [UIView]]>```
 
 Handles some of the Swift bugs related to architecture differences.
 

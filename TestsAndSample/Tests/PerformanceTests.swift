@@ -14,7 +14,7 @@ class PerformanceTests: XCTestCase {
   var hub = NotificationHub<[String:String]>()
   var center = NSNotificationCenter()
   let limit = 1000
-  let recursiveLimit = 30
+  let recursiveLimit = 100
   
   override func setUp() {
     super.setUp()

@@ -76,7 +76,7 @@ get { return NotificationHub<[String:Any]>.defaultHub }
 
 
 class NotificationHub<T>  {
-  final private var internalNotifications    =  NSMutableDictionary()
+  final private var internalNotifications    =  NSMutableDictionary(capacity: 1000)
   final var notifications:[String: [Notification<T>]] {
     return self.internalNotifications as AnyObject as [String: [Notification<T>]]
   }
@@ -105,6 +105,8 @@ class NotificationHub<T>  {
       notifications.addObject(notification)
     }
     else {
+      var array = NSMutableArray(capacity: 10)
+      array.addObject(notification)
       self.internalNotifications[name] = NSMutableArray(object: notification)
     }
 
@@ -120,8 +122,8 @@ class NotificationHub<T>  {
       if sender != nil {
         for notification in notifications {
           let not:Notification = notification as Notification<T>
-          if  notification.sender === sender { didPublish = not.publishUserInfo(userInfo) }
-          else if notification.sender == nil {
+          if  not.sender === sender { didPublish = not.publishUserInfo(userInfo) }
+          else if not.sender == nil {
             not.sender = sender
             didPublish = not.publishUserInfo(userInfo)
             not.sender = nil
