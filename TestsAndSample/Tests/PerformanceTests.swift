@@ -100,17 +100,17 @@ class PerformanceTests: XCTestCase {
   }
 
   
-//  func testAppleRemove() {
-//    var observers = [NSObjectProtocol]()
-//    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
-//      observers.append(self.center.addObserverForName(String(j), object: nil, queue: nil) { not in })
-//      }}
-//    
-//    self.measureBlock() {
-//      for observer in observers {
-//        self.center.removeObserver(observer)
-//      }; return }
-//  }
+  func testAppleRemove() {
+    var observers = [NSObjectProtocol]()
+    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+      observers.append(self.center.addObserverForName(String(j), object: nil, queue: nil) { not in })
+      }}
+    
+    self.measureBlock() {
+      for observer in observers {
+        self.center.removeObserver(observer)
+      }; return }
+  }
 
 
 }
