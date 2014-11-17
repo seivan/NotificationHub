@@ -23,8 +23,10 @@ class PerformanceTests: XCTestCase {
     self.center = NSNotificationCenter()
 
   }
-  //////////////////////////////////////////////////////////////////////////
-  
+
+  /**************************************************************************
+  SUBSCRIBE
+  ***************************************************************************/
   
   
   func testSubscribe() {
@@ -40,9 +42,9 @@ class PerformanceTests: XCTestCase {
         }}; return }}
 
   
-  ////////////////////////////////////////////////////////////////////////
-  
-  
+  /**************************************************************************
+  PUBLISH
+  ***************************************************************************/
   
   func testPublish() {
     for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
@@ -69,11 +71,34 @@ class PerformanceTests: XCTestCase {
   
   
 
-  ////////////////////////////////////////////////////////////////////////
+  /**************************************************************************
+  REMOVE
+  ***************************************************************************/
   
-  
-  
-  func testRemove() {
+  func testRemoveNotifications() {
+    var observers = [Notification<[String : String]>]()
+    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+      observers.append(self.hub.subscribeNotificationForName(String(j), sender: nil) { not in})
+      }}
+    
+    self.measureBlock() {
+      for observer in observers {
+        self.hub.removeNotification(observer)
+      }; return }
+  }
+
+  func testRemoveNotificationWithName() {
+    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+      self.hub.subscribeNotificationForName(String(j), sender: nil) { not in}
+      }}
+    
+    self.measureBlock() {
+      for i in 0...self.recursiveLimit {
+        self.hub.removeNotificationsName(String(i), sender: nil)
+      }; return }
+  }
+
+  func testRemoveNotificationWithNameSender() {
     for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
       self.hub.subscribeNotificationForName(String(j), sender: nil) { not in}
       }}
@@ -83,7 +108,7 @@ class PerformanceTests: XCTestCase {
         self.hub.removeNotificationsName(String(i), sender: self)
       }; return }
   }
-  
+
   
   func testAppleRemove() {
     var observers = [NSObjectProtocol]()
