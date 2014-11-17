@@ -50,7 +50,6 @@ func ==<T>(lhs: Notification<T>, rhs: Notification<T>) -> Bool {
 
 
 
-
 //private extension Array {
 //  func _executeNotifications() {
 //   for t in self { (t as Notification<T>).execute() }
