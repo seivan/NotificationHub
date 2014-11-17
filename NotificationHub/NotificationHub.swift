@@ -18,11 +18,6 @@ class Notification<T> : Equatable {
 
   }
   
-  private convenience init(hub:NotificationHub<T>, name:String, sender:AnyObject?, handler:NotificationClosure) {
-    self.init(name:name, sender:sender, handler:handler)
-    self.hub = hub
-  }
-
 
   final func publishUserInfo(userInfo:T?) -> Bool {
     if(self.hub == nil) { return false }
@@ -91,12 +86,12 @@ class NotificationHub<T>  {
 
   
   func subscribeNotificationForName(name: String, sender: AnyObject? = nil, handler: (Notification<T>) -> Void) -> Notification<T> {
-    let notification = Notification(hub:self, name: name, sender: sender, handler: handler)
+    let notification = Notification(name: name, sender: sender, handler: handler)
     return self.subscribeNotification(notification)
   }
 
   func subscribeNotification(notification:Notification<T>) -> Notification<T> {
-    if notification.hub != nil && notification.hub !== self { notification.hub?.removeNotification(notification) }
+    if notification.hub != nil{ notification.hub?.removeNotification(notification) }
     notification.hub = self
 
     let name = notification.name
@@ -121,20 +116,19 @@ class NotificationHub<T>  {
       if sender != nil {
         for notification in notifications {
           let not:Notification = notification as Notification<T>
-          if  not.sender === sender { didPublish = not.publishUserInfo(userInfo) }
-          else if not.sender == nil {
+          if not.sender == nil {
             not.sender = sender
             didPublish = not.publishUserInfo(userInfo)
             not.sender = nil
           }
+
+          else if  not.sender === sender { didPublish = not.publishUserInfo(userInfo) }
         }
       }
       else {
         for notification in notifications {
           let not:Notification = notification as Notification<T>
-          if not.sender == nil {
-            didPublish = not.publishUserInfo(userInfo)
-          }
+          if not.sender == nil { didPublish = not.publishUserInfo(userInfo) }
         }
       }
     }

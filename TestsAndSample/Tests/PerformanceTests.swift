@@ -14,7 +14,7 @@ class PerformanceTests: XCTestCase {
   var hub = NotificationHub<[String:String]>()
   var center = NSNotificationCenter()
   let limit = 1000
-  let recursiveLimit = 30 //30*30 = 900
+  let recursiveLimit = 50 //30*30 = 900
   
   override func setUp() {
     super.setUp()
@@ -100,17 +100,17 @@ class PerformanceTests: XCTestCase {
   }
 
   
-  func testAppleRemove() {
-    var observers = [NSObjectProtocol]()
-    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
-      observers.append(self.center.addObserverForName(String(j), object: nil, queue: nil) { not in })
-      }}
-    
-    self.measureBlock() {
-      for observer in observers {
-        self.center.removeObserver(observer)
-      }; return }
-  }
+//  func testAppleRemove() {
+//    var observers = [NSObjectProtocol]()
+//    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+//      observers.append(self.center.addObserverForName(String(j), object: nil, queue: nil) { not in })
+//      }}
+//    
+//    self.measureBlock() {
+//      for observer in observers {
+//        self.center.removeObserver(observer)
+//      }; return }
+//  }
 
 
 }
