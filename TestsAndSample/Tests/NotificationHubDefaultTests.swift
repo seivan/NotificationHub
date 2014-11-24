@@ -10,18 +10,18 @@ import XCTest
 
 
 class NotificationHubDefaultTests: XCTestCase {
-  var hub = NotificationHub<[String:Any]>()
   let notificationName = "notificationName"
   var notificationUserInfo = [String:Any]()
   
   override func setUp() {
     super.setUp()
     self.notificationUserInfo["key"] = 5
-    var hub = NotificationHub<[String:Any]>()
   }
     
   override func tearDown() {
     super.tearDown()
+    NotificationHubDefault.removeAllNotifications()
+    
   }
 
   
@@ -32,7 +32,7 @@ class NotificationHubDefaultTests: XCTestCase {
   
   func testCreateNotificationHub() {
     var hub = NotificationHub<[String:String]>()
-    XCTAssertFalse(self.hub === hub)
+    XCTAssertFalse(NotificationHubDefault === hub)
     XCTAssertNotNil(hub)
   }
   
@@ -60,7 +60,7 @@ class NotificationHubDefaultTests: XCTestCase {
 
   func testSubscribeNotificationShouldChangeHub() {
     let expectation = self.expectationWithDescription(self.notificationName)
-    
+    let hub = NotificationHub<[String:Any]>()
     let not = Notification<[String:Any]>(name: self.notificationName, sender: self) { notification in
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
@@ -71,7 +71,7 @@ class NotificationHubDefaultTests: XCTestCase {
       
     }
     
-    let notification = self.hub.subscribeNotification(not)
+    let notification = hub.subscribeNotification(not)
     var didPublish = NotificationHubDefault.publishNotification(not)
     XCTAssertFalse(didPublish)
     
@@ -87,7 +87,7 @@ class NotificationHubDefaultTests: XCTestCase {
 
   
   func testSubscribeWithoutSender() {
-    var notification = self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
+    var notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
     }
     XCTAssertNotNil(notification)
     XCTAssertEqual(self.notificationName, notification.name)
@@ -100,14 +100,14 @@ class NotificationHubDefaultTests: XCTestCase {
   func testPublishWithoutSender() {
     let expectation = self.expectationWithDescription(self.notificationName)
 
-    self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
       XCTAssertNil(notification.sender)
       XCTAssertTrue(notification.userInfo == nil)
       expectation.fulfill()
     }
-    let didPublish = self.hub.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
+    let didPublish = NotificationHubDefault.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
     self.waitForExpectationsWithTimeout(1, nil)
     
     XCTAssertTrue(didPublish)
@@ -118,7 +118,7 @@ class NotificationHubDefaultTests: XCTestCase {
   func testPublishWithSenderSubscribeWithoutSender() {
     let expectation = self.expectationWithDescription(self.notificationName)
     
-    self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
       XCTAssertNotNil(notification.sender)
@@ -126,7 +126,7 @@ class NotificationHubDefaultTests: XCTestCase {
       XCTAssertTrue(notification.userInfo == nil)
       expectation.fulfill()
     }
-    let didPublish = self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
+    let didPublish = NotificationHubDefault.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
     self.waitForExpectationsWithTimeout(1,nil)
     
     XCTAssertTrue(didPublish)
@@ -137,10 +137,10 @@ class NotificationHubDefaultTests: XCTestCase {
     let expectation = self.expectationWithDescription(self.notificationName)
     
     var isNotPublished = true
-    self.hub.subscribeNotificationForName(self.notificationName, sender: self) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { notification in
       isNotPublished = false
     }
-    let didPublish = self.hub.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
+    let didPublish = NotificationHubDefault.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
     if isNotPublished { expectation.fulfill() }
     self.waitForExpectationsWithTimeout(1,nil)
     
@@ -150,7 +150,7 @@ class NotificationHubDefaultTests: XCTestCase {
   func testPublishWithSender() {
     let expectation = self.expectationWithDescription(self.notificationName)
 
-    self.hub.subscribeNotificationForName(self.notificationName, sender: self) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { notification in
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
       XCTAssertNotNil(notification.sender)
@@ -159,7 +159,7 @@ class NotificationHubDefaultTests: XCTestCase {
       expectation.fulfill()
 
     }
-    let didPublish = self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
+    let didPublish = NotificationHubDefault.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
     self.waitForExpectationsWithTimeout(1,nil)
     
     XCTAssertTrue(didPublish)
@@ -169,7 +169,7 @@ class NotificationHubDefaultTests: XCTestCase {
   func testPublishWithSenderAndWithoutSender() {
 
     let expectationFirst = self.expectationWithDescription(self.notificationName)
-    self.hub.subscribeNotificationForName(self.notificationName, sender: self) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { notification in
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
       XCTAssertNotNil(notification.sender)
@@ -180,7 +180,7 @@ class NotificationHubDefaultTests: XCTestCase {
     }
     
     let expectationSecond = self.expectationWithDescription(self.notificationName)
-    self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
       XCTAssertNotNil(notification.sender)
@@ -190,7 +190,7 @@ class NotificationHubDefaultTests: XCTestCase {
       
     }
 
-    let didPublish = self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
+    let didPublish = NotificationHubDefault.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
     self.waitForExpectationsWithTimeout(1,nil)
     
     XCTAssertTrue(didPublish)
@@ -201,7 +201,7 @@ class NotificationHubDefaultTests: XCTestCase {
   func testPublishNotification() {
     let expectation = self.expectationWithDescription(self.notificationName)
     
-    let notification = self.hub.subscribeNotificationForName(self.notificationName, sender: self) { notification in
+    let notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { notification in
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
       XCTAssertNotNil(notification.sender)
@@ -210,7 +210,7 @@ class NotificationHubDefaultTests: XCTestCase {
       expectation.fulfill()
       
     }
-    let didPublish = self.hub.publishNotification(notification)
+    let didPublish = NotificationHubDefault.publishNotification(notification)
     self.waitForExpectationsWithTimeout(1,nil)
     
     XCTAssertTrue(didPublish)
@@ -220,7 +220,7 @@ class NotificationHubDefaultTests: XCTestCase {
   func testPublishNotificationWithoutSubscribe() {
     let expectation = self.expectationWithDescription(self.notificationName)
     
-    let notification = self.hub.subscribeNotificationForName(self.notificationName, sender: self) { notification in
+    let notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { notification in
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
       XCTAssertNotNil(notification.sender)
@@ -229,7 +229,7 @@ class NotificationHubDefaultTests: XCTestCase {
       expectation.fulfill()
       
     }
-    let didPublish = self.hub.publishNotification(notification)
+    let didPublish = NotificationHubDefault.publishNotification(notification)
     self.waitForExpectationsWithTimeout(1,nil)
     
     XCTAssertTrue(didPublish)
@@ -240,11 +240,11 @@ class NotificationHubDefaultTests: XCTestCase {
     let expectation = self.expectationWithDescription(self.notificationName)
     
     var isRemoved = true
-    self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
       isRemoved = false
     }
-    let didRemove = self.hub.removeNotificationsName(self.notificationName, sender: nil)
-    let didPublish = self.hub.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
+    let didRemove = NotificationHubDefault.removeNotificationsName(self.notificationName, sender: nil)
+    let didPublish = NotificationHubDefault.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
     if isRemoved { expectation.fulfill() }
     self.waitForExpectationsWithTimeout(1, nil)
     
@@ -259,11 +259,11 @@ class NotificationHubDefaultTests: XCTestCase {
     let expectation = self.expectationWithDescription(self.notificationName)
     
     var isRemoved = true
-    self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
       isRemoved = false
     }
-    let didRemove = self.hub.removeNotificationsName(self.notificationName, sender: self)
-    let didPublish = self.hub.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
+    let didRemove = NotificationHubDefault.removeNotificationsName(self.notificationName, sender: self)
+    let didPublish = NotificationHubDefault.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
     if isRemoved { expectation.fulfill() }
     self.waitForExpectationsWithTimeout(1, nil)
     
@@ -277,11 +277,11 @@ class NotificationHubDefaultTests: XCTestCase {
     let expectation = self.expectationWithDescription(self.notificationName)
     
     var isRemoved = false
-    self.hub.subscribeNotificationForName(self.notificationName, sender: self) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { notification in
       isRemoved = true
     }
-    let didRemove  = self.hub.removeNotificationsName(self.notificationName, sender: nil)
-    let didPublish = self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
+    let didRemove  = NotificationHubDefault.removeNotificationsName(self.notificationName, sender: nil)
+    let didPublish = NotificationHubDefault.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
     if isRemoved  { expectation.fulfill() }
     self.waitForExpectationsWithTimeout(1, nil)
     
@@ -296,11 +296,11 @@ class NotificationHubDefaultTests: XCTestCase {
     let expectation = self.expectationWithDescription(self.notificationName)
     
     var isRemoved = true
-    self.hub.subscribeNotificationForName(self.notificationName, sender: self) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { notification in
       isRemoved = false
     }
-    let didRemove  = self.hub.removeNotificationsName(self.notificationName, sender: self)
-    let didPublish = self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
+    let didRemove  = NotificationHubDefault.removeNotificationsName(self.notificationName, sender: self)
+    let didPublish = NotificationHubDefault.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
     if isRemoved { expectation.fulfill() }
     self.waitForExpectationsWithTimeout(1, nil)
     
@@ -315,17 +315,17 @@ class NotificationHubDefaultTests: XCTestCase {
     let expectation = self.expectationWithDescription(self.notificationName)
     
     var isRemoved = true
-    self.hub.subscribeNotificationForName(self.notificationName, sender: self) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { notification in
       isRemoved = false
     }
     
-    self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
       isRemoved = false
     }
 
-    let didRemove             = self.hub.removeAllNotificationsName(self.notificationName)
-    let didPublishWithSelf    = self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
-    let didPublishWithOutSelf = self.hub.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
+    let didRemove             = NotificationHubDefault.removeAllNotificationsName(self.notificationName)
+    let didPublishWithSelf    = NotificationHubDefault.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
+    let didPublishWithOutSelf = NotificationHubDefault.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
     
     if isRemoved { expectation.fulfill() }
     self.waitForExpectationsWithTimeout(1, nil)
@@ -333,7 +333,7 @@ class NotificationHubDefaultTests: XCTestCase {
     XCTAssertTrue(didRemove)
     XCTAssertFalse(didPublishWithSelf)
     XCTAssertFalse(didPublishWithOutSelf)
-    XCTAssertFalse(self.hub.removeAllNotificationsName(self.notificationName))
+    XCTAssertFalse(NotificationHubDefault.removeAllNotificationsName(self.notificationName))
     
   }
 
@@ -342,22 +342,22 @@ class NotificationHubDefaultTests: XCTestCase {
     let expectation = self.expectationWithDescription(self.notificationName)
     
     var isRemoved = true
-    self.hub.subscribeNotificationForName(self.notificationName, sender: self) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { notification in
       isRemoved = false
     }
     
-    self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
       isRemoved = false
     }
 
-    self.hub.subscribeNotificationForName("Testing something", sender: nil) { notification in
+    NotificationHubDefault.subscribeNotificationForName("Testing something", sender: nil) { notification in
       isRemoved = false
     }
 
-    let didRemove               = self.hub.removeAllNotifications()
-    let didPublishWithSelf      = self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
-    let didPublishWithOutSelf   = self.hub.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
-    let didPublishDifferentName = self.hub.publishNotificationName("Testing something", sender: nil, userInfo: nil)
+    let didRemove               = NotificationHubDefault.removeAllNotifications()
+    let didPublishWithSelf      = NotificationHubDefault.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
+    let didPublishWithOutSelf   = NotificationHubDefault.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
+    let didPublishDifferentName = NotificationHubDefault.publishNotificationName("Testing something", sender: nil, userInfo: nil)
     
     if isRemoved { expectation.fulfill() }
     self.waitForExpectationsWithTimeout(1, nil)
@@ -366,8 +366,8 @@ class NotificationHubDefaultTests: XCTestCase {
     XCTAssertFalse(didPublishWithSelf)
     XCTAssertFalse(didPublishWithOutSelf)
     XCTAssertFalse(didPublishDifferentName)
-    XCTAssertFalse(self.hub.removeAllNotifications())
-    XCTAssertTrue(self.hub.notifications.isEmpty)
+    XCTAssertFalse(NotificationHubDefault.removeAllNotifications())
+    XCTAssertTrue(NotificationHubDefault.notifications.isEmpty)
     
   }
 
@@ -375,14 +375,14 @@ class NotificationHubDefaultTests: XCTestCase {
   func testPostWithUserInfo() {
     let expectation = self.expectationWithDescription(self.notificationName)
 
-    self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { n in
+    NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: nil) { n in
       let value = n.userInfo!["key"] as Int
       let expectedValue = self.notificationUserInfo["key"] as Int
       XCTAssertEqual(value, expectedValue)
       XCTAssertNotNil(value)
       expectation.fulfill()
     }
-   let didPublish = self.hub.publishNotificationName(self.notificationName, sender: nil, userInfo: self.notificationUserInfo)
+   let didPublish = NotificationHubDefault.publishNotificationName(self.notificationName, sender: nil, userInfo: self.notificationUserInfo)
    self.waitForExpectationsWithTimeout(1, nil)
 
     XCTAssertTrue(didPublish)

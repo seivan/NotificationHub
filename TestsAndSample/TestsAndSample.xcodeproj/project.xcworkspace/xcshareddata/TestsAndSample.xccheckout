@@ -12,6 +12,8 @@
 	<dict>
 		<key>385E476955E4CA7E59E842478FBE8A019B31218E</key>
 		<string>github.com:seivan/VectorArithmetic.git</string>
+		<key>7D887212F7F2DC6B33722FF599E54D6F40E43439</key>
+		<string>github.com:seivan/NotificationHub.git</string>
 		<key>A6A21D7E-207A-4B0F-9E1D-5E7C1AE26371</key>
 		<string>ssh://github.com/seivan/VectorArithmetic.git</string>
 	</dict>
@@ -20,18 +22,28 @@
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>385E476955E4CA7E59E842478FBE8A019B31218E</key>
+		<string>../../../../SpriteKitComposition</string>
+		<key>7D887212F7F2DC6B33722FF599E54D6F40E43439</key>
 		<string>../../..</string>
 		<key>A6A21D7E-207A-4B0F-9E1D-5E7C1AE26371</key>
 		<string>../../../../VectorArithmetic</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>github.com:seivan/VectorArithmetic.git</string>
+	<string>github.com:seivan/NotificationHub.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>385E476955E4CA7E59E842478FBE8A019B31218E</string>
+	<string>7D887212F7F2DC6B33722FF599E54D6F40E43439</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>7D887212F7F2DC6B33722FF599E54D6F40E43439</string>
+			<key>IDESourceControlWCCName</key>
+			<string>NotificationHub</string>
+		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>

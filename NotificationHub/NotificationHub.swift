@@ -91,7 +91,7 @@ class NotificationHub<T>  {
   }
 
   func subscribeNotification(notification:Notification<T>) -> Notification<T> {
-    if notification.hub != nil{ notification.hub?.removeNotification(notification) }
+    if notification.hub !== nil { notification.hub?.removeNotification(notification) }
     notification.hub = self
 
     let name = notification.name
@@ -151,6 +151,7 @@ class NotificationHub<T>  {
 
     notifications?.removeObject(notification)
     
+    
     if notifications?.count == 0  { self.internalNotifications.removeObjectForKey(name) }
     notification.hub = nil
 
@@ -183,6 +184,13 @@ class NotificationHub<T>  {
   func removeAllNotificationsName(name:String) -> Bool {
     let preCount = self.internalNotifications.count
     self.internalNotifications.removeObjectForKey(name)
+    let postCount = self.internalNotifications.count
+    return preCount != postCount
+  }
+
+  func removeAllNotificationsSender(sender:AnyObject) -> Bool {
+    let preCount = self.internalNotifications.count
+    self.internalNotifications.toManyRelationshipKeys
     let postCount = self.internalNotifications.count
     return preCount != postCount
   }

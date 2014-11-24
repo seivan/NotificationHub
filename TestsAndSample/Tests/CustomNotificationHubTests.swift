@@ -18,6 +18,12 @@ class CustomNotificationHubTests: XCTestCase {
     self.hub = NotificationHub<(string: String, int: Int)>()
   }
   
+  func testCreateNotificationHub() {
+    var hub = NotificationHub<[String:String]>()
+    XCTAssertFalse(self.hub === hub)
+    XCTAssertNotNil(hub)
+  }
+
   func subscribe(notificationName:String = "notificationName", sender:AnyObject? = nil, block:(@autoclosure () -> ())? = nil) -> Notification<(string: String, int: Int)>  {
     return self.hub.subscribeNotificationForName(notificationName, sender: sender) { not in
       if(block != nil) { block!() }
@@ -109,25 +115,35 @@ class CustomNotificationHubTests: XCTestCase {
 
   func testRemoveNotifications() {
     self.subscribeAndResetCounter()
+    var didPublishFlags = [Bool]()
     for i in 0..<100 { self.hub.removeNotificationsName(String(i), sender: nil) }
-    for i in 0..<100 { self.publish(notificationName: String(i), sender:self) }
+    for i in 0..<100 { didPublishFlags.append(self.publish(notificationName: String(i), sender:self)) }
+    didPublishFlags = didPublishFlags.filter() { flag in return flag == true }
     XCTAssertEqual(self.counter, 100)
+    XCTAssertEqual(didPublishFlags.count, 100)
+    
   }
 
   func testRemoveNotificationsSender() {
     self.subscribeAndResetCounter()
+    var didPublishFlags = [Bool]()
     for i in 0..<100 { self.hub.removeNotificationsName(String(i), sender: self) }
-    for i in 0..<100 { self.publish(notificationName: String(i), sender:self) }
+    for i in 0..<100 { didPublishFlags.append(self.publish(notificationName: String(i), sender:self)) }
+    didPublishFlags = didPublishFlags.filter() { flag in return flag == true }
     XCTAssertEqual(self.counter, 0)
+    XCTAssertEqual(didPublishFlags.count, 0)
   }
   
   func testGetNotifications() {
     self.subscribeAndResetCounter()
     XCTAssertEqual(self.hub.notifications.count, 100)
-    for i in 0..<100 {
-    XCTAssertTrue(self.hub.notifications[String(i)]?.count == 2)
-    }
+    for i in 0..<100 { XCTAssertTrue(self.hub.notifications[String(i)]?.count == 2) }
     
+  }
+  
+  func testRemoveWithSender() {
+    self.subscribeAndResetCounter()
+    self.hub.removeAllNotificationsSender(self)
     
   }
   
