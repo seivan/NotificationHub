@@ -99,6 +99,28 @@ class PerformanceTests: XCTestCase {
       }; return }
   }
 
+  func testRemoveAllSender() {
+    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+      self.hub.subscribeNotificationForName(String(j), sender: self) { not in}
+      }}
+    
+    self.measureBlock() {
+      self.hub.removeAllNotificationsSender(self)
+      return
+    }
+  }
+  
+  func testRemoveAll() {
+    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+      self.hub.subscribeNotificationForName(String(j), sender: self) { not in}
+      }}
+    
+    self.measureBlock() {
+      self.hub.removeAllNotifications()
+      return
+    }
+  }
+
   
   func testAppleRemove() {
     var observers = [NSObjectProtocol]()

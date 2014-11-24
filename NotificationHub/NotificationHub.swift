@@ -183,22 +183,49 @@ class NotificationHub<T>  {
   
   func removeAllNotificationsName(name:String) -> Bool {
     let preCount = self.internalNotifications.count
+    let notifications: NSArray? = self.internalNotifications[name] as? NSMutableArray
     self.internalNotifications.removeObjectForKey(name)
+
+    if let notifications = notifications {
+      for notification in notifications {
+        let not:Notification = notification as Notification<T>
+        not.hub = nil
+      }
+    }
+    
     let postCount = self.internalNotifications.count
     return preCount != postCount
   }
 
   func removeAllNotificationsSender(sender:AnyObject) -> Bool {
-    let preCount = self.internalNotifications.count
-    self.internalNotifications.toManyRelationshipKeys
-    let postCount = self.internalNotifications.count
-    return preCount != postCount
+    var count = self.internalNotifications.count
+    let notifications = self.internalNotifications.allValues as? [[Notification<T>]]
+    
+    if let notifications = notifications {
+      for notificationList in notifications {
+        for notification in notificationList {
+          if notification.sender === sender { notification.remove() }
+        }
+      }
+    }
+    self.internalNotifications.removeAllObjects()
+    return count > 0
   }
 
   
   
   func removeAllNotifications() -> Bool {
     var count = self.internalNotifications.count
+    let notifications = self.internalNotifications.allValues as? [[Notification<T>]]
+
+    self.internalNotifications.removeAllObjects()
+    if let notifications = notifications {
+      for notificationList in notifications {
+        for notification in notificationList {
+          notification.hub = nil
+        }
+      }
+    }
     self.internalNotifications.removeAllObjects()
     return count > 0
   }
