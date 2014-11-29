@@ -8,9 +8,6 @@
 
 import XCTest
 
-func ==(lhs:(String, AnyObject?), rhs:(String, AnyObject?)) -> Bool {
-  return lhs.0 == rhs.0 && lhs.1 === rhs.1
-}
 class MockingTests: XCTestCase {
 
   var hub = NotificationHub<String>()

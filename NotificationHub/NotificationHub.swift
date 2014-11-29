@@ -70,29 +70,6 @@ var NotificationHubDefault : NotificationHub<[String:Any]> {
 get { return NotificationHub<[String:Any]>.defaultHub }
 }
 
-#if DEBUG
-  public struct NotificationHubMock {
-  //  typealias closureType = (parameterTypes) -> (returnType)
-  
-  private static var onPublishMockHandler:((name:String, sender:AnyObject?, userInfo:Any?) -> (Void))?
-  static func onPublishingMockHandler(handler:(name:String, sender:AnyObject?, userInfo:Any?) -> (Void))  {
-  self.onPublishMockHandler = handler
-  }
-  
-  private static var onSubscribeMockHandler:((name:String, sender:AnyObject?) -> Void)?
-  static func onSubscribingMock(handler:(name:String, sender:AnyObject?) -> Void)  {
-  self.onSubscribeMockHandler = handler
-  }
-  
-  private static var onRemoveMockHandler:((name:String, sender:AnyObject?) -> Void)?
-  static func onRemovingMockHandler(handler:(name:String, sender:AnyObject?) -> Void)  {
-  self.onRemoveMockHandler = handler
-  }
-  
-  }
-#endif
-
-
 
 public class NotificationHub<T>  {
   final private var internalNotifications    =  NSMutableDictionary(capacity: 1000)
@@ -258,3 +235,25 @@ public func ==<T>(lhs: Notification<T>, rhs: Notification<T>) -> Bool { return l
 
 extension NotificationHub : Equatable {}
 public func ==<T>(lhs: NotificationHub<T>, rhs: NotificationHub<T>) -> Bool { return lhs === rhs }
+
+
+#if DEBUG
+public struct NotificationHubMock {
+  
+  private static var onPublishMockHandler:((name:String, sender:AnyObject?, userInfo:Any?) -> (Void))?
+  static func onPublishingMockHandler(handler:(name:String, sender:AnyObject?, userInfo:Any?) -> (Void))  {
+    self.onPublishMockHandler = handler
+  }
+  
+  private static var onSubscribeMockHandler:((name:String, sender:AnyObject?) -> Void)?
+  static func onSubscribingMock(handler:(name:String, sender:AnyObject?) -> Void)  {
+    self.onSubscribeMockHandler = handler
+  }
+  
+  private static var onRemoveMockHandler:((name:String, sender:AnyObject?) -> Void)?
+  static func onRemovingMockHandler(handler:(name:String, sender:AnyObject?) -> Void)  {
+    self.onRemoveMockHandler = handler
+  }
+  
+}
+#endif
