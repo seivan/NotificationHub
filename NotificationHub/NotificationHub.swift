@@ -1,26 +1,34 @@
 import Foundation
 
-class Notification<T> : Equatable {
+public class Notification<T>  {
   typealias NotificationClosure = (Notification<T>) -> Void
   let name:String
   private(set) weak var sender:AnyObject?
   private(set) var userInfo:T?
   private let closure:NotificationClosure
-
+  
   
   private weak var hub:NotificationHub<T>?
-
+  
   
   init(name:String, sender:AnyObject?, handler:NotificationClosure) {
     self.name     = name
     self.closure  = handler
     self.sender   = sender
-
+    
+    #if DEBUG
+      NotificationHubMock.onSubscribeMockHandler?(name:self.name,sender:self.sender)
+    #endif
+    
   }
   
-
+  
   final func publishUserInfo(userInfo:T?) -> Bool {
     if(self.hub == nil) { return false }
+    
+    #if DEBUG
+      NotificationHubMock.onPublishMockHandler?(name: self.name, sender: self.sender, userInfo: userInfo)
+    #endif
     
     self.userInfo = userInfo
     self.closure(self)
@@ -39,23 +47,6 @@ class Notification<T> : Equatable {
   
 }
 
-func ==<T>(lhs: Notification<T>, rhs: Notification<T>) -> Bool {
-    return lhs === rhs
-}
-
-
-
-//private extension Array {
-//  func _executeNotifications() {
-//   for t in self { (t as Notification<T>).execute() }
-//  }
-//  mutating func _removeNotification <U>(notification:Notification<U>) {
-//    self = self.filter { ($0 as Notification<U>) !== notification }
-//  }
-//  mutating func _removeNotification(name:String) {
-//    self = self.filter { ($0 as Notification<Any>).name != name }
-//  }
-//}
 
 private struct Static {
   static var hubToken : dispatch_once_t = 0
@@ -67,14 +58,36 @@ var NotificationHubDefault : NotificationHub<[String:Any]> {
 get { return NotificationHub<[String:Any]>.defaultHub }
 }
 
+#if DEBUG
+  public struct NotificationHubMock {
+  //  typealias closureType = (parameterTypes) -> (returnType)
+  
+  private static var onPublishMockHandler:((name:String, sender:AnyObject?, userInfo:Any?) -> (Void))?
+  static func onPublishingMockHandler(handler:(name:String, sender:AnyObject?, userInfo:Any?) -> (Void))  {
+  self.onPublishMockHandler = handler
+  }
+  
+  private static var onSubscribeMockHandler:((name:String, sender:AnyObject?) -> Void)?
+  static func onSubscribingMock(handler:(name:String, sender:AnyObject?) -> Void)  {
+  self.onSubscribeMockHandler = handler
+  }
+  
+  private static var onRemoveMockHandler:((name:String, sender:AnyObject?) -> Void)?
+  static func onRemovingMockHandler(handler:(name:String, sender:AnyObject?) -> Void)  {
+  self.onRemoveMockHandler = handler
+  }
+  
+  }
+#endif
 
 
-class NotificationHub<T>  {
+
+public class NotificationHub<T>  {
   final private var internalNotifications    =  NSMutableDictionary(capacity: 1000)
   final var notifications:[String: [Notification<T>]] {
     return self.internalNotifications as AnyObject as [String: [Notification<T>]]
   }
-
+  
   private class var defaultHub:NotificationHub<[String:Any]> {
     dispatch_once(&Static.hubToken) {
       Static.hub = NotificationHub<[String:Any]>()
@@ -83,17 +96,17 @@ class NotificationHub<T>  {
   }
   
   init() {}
-
+  
   
   func subscribeNotificationForName(name: String, sender: AnyObject? = nil, handler: (Notification<T>) -> Void) -> Notification<T> {
     let notification = Notification(name: name, sender: sender, handler: handler)
     return self.subscribeNotification(notification)
   }
-
+  
   func subscribeNotification(notification:Notification<T>) -> Notification<T> {
     if notification.hub !== nil { notification.hub?.removeNotification(notification) }
     notification.hub = self
-
+    
     let name = notification.name
     if let notifications: NSMutableArray = self.internalNotifications[notification.name] as NSMutableArray? {
       notifications.addObject(notification)
@@ -103,11 +116,11 @@ class NotificationHub<T>  {
       array.addObject(notification)
       self.internalNotifications[name] = NSMutableArray(object: notification)
     }
-
+    
     return notification
   }
   
-
+  
   func publishNotificationName(name: String, sender: AnyObject? = nil, userInfo:T? = nil) -> Bool {
     
     var didPublish = false
@@ -121,7 +134,6 @@ class NotificationHub<T>  {
             didPublish = not.publishUserInfo(userInfo)
             not.sender = nil
           }
-
           else if  not.sender === sender { didPublish = not.publishUserInfo(userInfo) }
         }
       }
@@ -136,7 +148,7 @@ class NotificationHub<T>  {
     
     return didPublish
   }
-
+  
   
   func publishNotification(notification: Notification<T>, userInfo:T? = nil) -> Bool {
     if (notification.hub === self) { return notification.publishUserInfo(userInfo) }
@@ -145,21 +157,25 @@ class NotificationHub<T>  {
   
   func removeNotification(notification: Notification<T>) -> Bool {
     if notification.hub !== self { return false }
-
+    
     let name = notification.name
     var notifications = self.internalNotifications[name] as? NSMutableArray
-
+    
     notifications?.removeObject(notification)
     
     
     if notifications?.count == 0  { self.internalNotifications.removeObjectForKey(name) }
     notification.hub = nil
-
+    
+    #if DEBUG
+      NotificationHubMock.onRemoveMockHandler?(name:notification.name, sender:notification.sender)
+    #endif
+    
     return true
   }
   
   func removeNotificationsName(name:String, sender: AnyObject? = nil) -> Bool {
-
+    
     var notifications = self.internalNotifications[name] as? NSMutableArray
     let preCount = notifications?.count
     
@@ -169,6 +185,10 @@ class NotificationHub<T>  {
         if not.sender == nil || not.sender === sender {
           notifications.removeObject(not)
           not.hub = nil
+          #if DEBUG
+            NotificationHubMock.onRemoveMockHandler?(name:notification.name, sender:notification.sender)
+          #endif
+          
         }
       }
     }
@@ -176,7 +196,10 @@ class NotificationHub<T>  {
     let postCount = notifications?.count
     if postCount == 0 {self.internalNotifications.removeObjectForKey(name) }
     
-
+    
+    #if DEBUG
+      NotificationHubMock.onRemoveMockHandler?(name:name, sender:sender)
+    #endif
     return preCount != postCount
     
   }
@@ -185,18 +208,22 @@ class NotificationHub<T>  {
     let preCount = self.internalNotifications.count
     let notifications: NSArray? = self.internalNotifications[name] as? NSMutableArray
     self.internalNotifications.removeObjectForKey(name)
-
+    
     if let notifications = notifications {
       for notification in notifications {
         let not:Notification = notification as Notification<T>
         not.hub = nil
+        #if DEBUG
+          NotificationHubMock.onRemoveMockHandler?(name:not.name, sender:not.sender)
+        #endif
+        
       }
     }
     
     let postCount = self.internalNotifications.count
     return preCount != postCount
   }
-
+  
   func removeAllNotificationsSender(sender:AnyObject) -> Bool {
     var count = self.internalNotifications.count
     let notifications = self.internalNotifications.allValues as? [[Notification<T>]]
@@ -211,18 +238,22 @@ class NotificationHub<T>  {
     self.internalNotifications.removeAllObjects()
     return count > 0
   }
-
+  
   
   
   func removeAllNotifications() -> Bool {
     var count = self.internalNotifications.count
     let notifications = self.internalNotifications.allValues as? [[Notification<T>]]
-
+    
     self.internalNotifications.removeAllObjects()
     if let notifications = notifications {
       for notificationList in notifications {
         for notification in notificationList {
           notification.hub = nil
+          #if DEBUG
+            NotificationHubMock.onRemoveMockHandler?(name:notification.name, sender:notification.sender)
+          #endif
+          
         }
       }
     }
@@ -232,3 +263,8 @@ class NotificationHub<T>  {
 }
 
 
+extension Notification : Equatable {}
+public func ==<T>(lhs: Notification<T>, rhs: Notification<T>) -> Bool { return lhs === rhs }
+
+extension NotificationHub : Equatable {}
+public func ==<T>(lhs: NotificationHub<T>, rhs: NotificationHub<T>) -> Bool { return lhs === rhs }

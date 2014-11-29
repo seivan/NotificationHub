@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		220262071A2A37C000181E53 /* MockingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220262061A2A37C000181E53 /* MockingTests.swift */; };
 		220A8EEA1A0726C8006D1D83 /* CustomNotificationHubTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220A8EE91A0726C8006D1D83 /* CustomNotificationHubTests.swift */; };
 		220A8EEC1A0726D9006D1D83 /* NotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220A8EEB1A0726D9006D1D83 /* NotificationTests.swift */; };
 		22B175911A06BD35004904C5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B175901A06BD35004904C5 /* AppDelegate.swift */; };
@@ -29,6 +30,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		220262061A2A37C000181E53 /* MockingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockingTests.swift; sourceTree = "<group>"; };
 		220A8EE91A0726C8006D1D83 /* CustomNotificationHubTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomNotificationHubTests.swift; sourceTree = "<group>"; };
 		220A8EEB1A0726D9006D1D83 /* NotificationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTests.swift; sourceTree = "<group>"; };
 		225F742619D8BEDF007F31C5 /* NotificationHub.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationHub.swift; sourceTree = "<group>"; };
@@ -116,6 +118,7 @@
 				22B175AE1A06BDBA004904C5 /* NotificationHubDefaultTests.swift */,
 				220A8EEB1A0726D9006D1D83 /* NotificationTests.swift */,
 				22B175AF1A06BDBA004904C5 /* PerformanceTests.swift */,
+				220262061A2A37C000181E53 /* MockingTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -228,6 +231,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				220262071A2A37C000181E53 /* MockingTests.swift in Sources */,
 				220A8EEC1A0726D9006D1D83 /* NotificationTests.swift in Sources */,
 				22B175B31A06BDBA004904C5 /* PerformanceTests.swift in Sources */,
 				22B175B21A06BDBA004904C5 /* NotificationHubDefaultTests.swift in Sources */,
