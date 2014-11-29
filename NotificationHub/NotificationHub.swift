@@ -8,7 +8,16 @@ public class Notification<T>  {
   private let closure:NotificationClosure
   
   
-  private weak var hub:NotificationHub<T>?
+  private weak var hub:NotificationHub<T>? {
+    willSet {
+      if(newValue == nil ) {
+        self.userInfo = nil
+        #if DEBUG
+          NotificationHubMock.onRemoveMockHandler?(name:self.name, sender:self.sender)
+        #endif
+      }
+    }
+  }
   
   
   init(name:String, sender:AnyObject?, handler:NotificationClosure) {
@@ -38,10 +47,13 @@ public class Notification<T>  {
   
   final func remove() -> Bool {
     if(self.hub == nil) { return false }
-    self.userInfo = nil
     self.hub?.removeNotification(self)
     self.hub = nil
     return true
+  }
+  
+  private func removeFromHub() {
+    
   }
   
   
@@ -167,10 +179,6 @@ public class NotificationHub<T>  {
     if notifications?.count == 0  { self.internalNotifications.removeObjectForKey(name) }
     notification.hub = nil
     
-    #if DEBUG
-      NotificationHubMock.onRemoveMockHandler?(name:notification.name, sender:notification.sender)
-    #endif
-    
     return true
   }
   
@@ -185,10 +193,6 @@ public class NotificationHub<T>  {
         if not.sender == nil || not.sender === sender {
           notifications.removeObject(not)
           not.hub = nil
-          #if DEBUG
-            NotificationHubMock.onRemoveMockHandler?(name:notification.name, sender:notification.sender)
-          #endif
-          
         }
       }
     }
@@ -197,9 +201,6 @@ public class NotificationHub<T>  {
     if postCount == 0 {self.internalNotifications.removeObjectForKey(name) }
     
     
-    #if DEBUG
-      NotificationHubMock.onRemoveMockHandler?(name:name, sender:sender)
-    #endif
     return preCount != postCount
     
   }
@@ -211,12 +212,7 @@ public class NotificationHub<T>  {
     
     if let notifications = notifications {
       for notification in notifications {
-        let not:Notification = notification as Notification<T>
-        not.hub = nil
-        #if DEBUG
-          NotificationHubMock.onRemoveMockHandler?(name:not.name, sender:not.sender)
-        #endif
-        
+        (notification as Notification<T>).hub = nil
       }
     }
     
@@ -248,13 +244,7 @@ public class NotificationHub<T>  {
     self.internalNotifications.removeAllObjects()
     if let notifications = notifications {
       for notificationList in notifications {
-        for notification in notificationList {
-          notification.hub = nil
-          #if DEBUG
-            NotificationHubMock.onRemoveMockHandler?(name:notification.name, sender:notification.sender)
-          #endif
-          
-        }
+        for notification in notificationList { notification.hub = nil }
       }
     }
     self.internalNotifications.removeAllObjects()

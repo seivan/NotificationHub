@@ -10,15 +10,32 @@ import XCTest
 
 class MockingTests: XCTestCase {
 
-    override func setUp() {
-        super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+  var hub = NotificationHub<String>()
+  let sender = self
+  override func setUp() {
+    super.setUp()
+    self.hub = NotificationHub<String>()
+  }
+  
+  override func tearDown() {
+    super.tearDown()
+    self.hub.removeAllNotifications()
+    NotificationHubDefault.removeAllNotifications()
+  }
+  
+  func testOnSubscribeMock() {
+    var mocks = [(String, AnyObject?)]()
+    NotificationHubMock.onSubscribingMock { (name, sender) in
+      mocks.append((name, sender))
     }
     
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
-    }
-
+    let first = NotificationHubDefault.subscribeNotificationForName("A name", sender: self) { n in }
+    let second = self.hub.subscribeNotificationForName("the second name", sender: nil) { n in }
+    
+    XCTAssertEqual(mocks.count, 2)
+    
+    
+  }
 
 }
+  
