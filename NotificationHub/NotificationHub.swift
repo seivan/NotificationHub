@@ -34,10 +34,6 @@ public class Notification<T>  {
     return true
   }
   
-  private func removeFromHub() {
-    
-  }
-  
   
 }
 
