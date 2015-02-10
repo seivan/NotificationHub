@@ -77,15 +77,8 @@ public class NotificationHub<T>  {
     notification.hub = self
     
     let name = notification.name
-    var notifications = self.notifications[name]
-    if notifications != nil  {
-      notifications?.append(notification)
-    }
-    else {
-      notifications = [notification]
-
-    }
-    
+    var notifications = self.notifications[name] ?? [Notification<T>]()
+    notifications.append(notification)
     self.notifications[name] = notifications
     
     return notification
@@ -99,8 +92,8 @@ public class NotificationHub<T>  {
     
     
     var didPublish = false
-    var notifications = self.notifications[name]
-    if let notifications = notifications {
+
+    if let notifications = self.notifications[name] {
       if sender != nil {
         for not in notifications {
           if not.sender == nil {
@@ -167,12 +160,10 @@ public class NotificationHub<T>  {
     let preCount = notifications?.count
     
     if var notifications = notifications {
-      for not in notifications {
+      for (index, not) in enumerate(notifications) {
         if not.sender == nil || not.sender === sender {
-          if let index = find(notifications, not) {
           notifications.removeAtIndex(index)
           not.hub = nil
-          }
         }
       }
     }
