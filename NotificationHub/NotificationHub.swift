@@ -79,13 +79,13 @@ public class NotificationHub<T>  {
     notification.hub = self
     
     let name = notification.name
-    if let notifications: NSMutableArray = self.internalNotifications[notification.name] as! NSMutableArray? {
+    if let notifications = self.internalNotifications[notification.name] as? NSMutableArray {
       notifications.addObject(notification)
     }
     else {
-      var array = NSMutableArray(capacity: 10)
+      var array = NSMutableArray(capacity: 50)
       array.addObject(notification)
-      self.internalNotifications[name] = NSMutableArray(object: notification)
+      self.internalNotifications[name] = array
     }
     
     return notification
@@ -99,8 +99,7 @@ public class NotificationHub<T>  {
     
     
     var didPublish = false
-    var notifications = self.internalNotifications[name] as? NSMutableArray
-    if let notifications = notifications {
+    if let notifications = self.internalNotifications[name] as? NSMutableArray {
       if sender != nil {
         for notification in notifications {
           let not:Notification = notification as! Notification<T>
