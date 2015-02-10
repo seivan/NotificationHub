@@ -50,10 +50,8 @@ private struct Static {
 
 
 public class NotificationHub<T>  {
-  final private var internalNotifications    =  NSMutableDictionary(capacity: 1000)
-  final var notifications:[String: [Notification<T>]] {
-    return self.internalNotifications as AnyObject as! [String: [Notification<T>]]
-  }
+
+  final var notifications = [String: Array<Notification<T>>]()
   
   private class var defaultHub:NotificationHub<[String:Any]> {
     dispatch_once(&Static.hubToken) {
@@ -62,7 +60,7 @@ public class NotificationHub<T>  {
     return Static.hub!
   }
   
-  init() {}
+  init() { }
   
   
   func subscribeNotificationForName(name: String, sender: AnyObject? = nil, handler: (Notification<T>) -> Void) -> Notification<T> {    
@@ -79,14 +77,16 @@ public class NotificationHub<T>  {
     notification.hub = self
     
     let name = notification.name
-    if let notifications: NSMutableArray = self.internalNotifications[notification.name] as! NSMutableArray? {
-      notifications.addObject(notification)
+    var notifications = self.notifications[name]
+    if notifications != nil  {
+      notifications?.append(notification)
     }
     else {
-      var array = NSMutableArray(capacity: 10)
-      array.addObject(notification)
-      self.internalNotifications[name] = NSMutableArray(object: notification)
+      notifications = [notification]
+
     }
+    
+    self.notifications[name] = notifications
     
     return notification
   }
@@ -99,11 +99,10 @@ public class NotificationHub<T>  {
     
     
     var didPublish = false
-    var notifications = self.internalNotifications[name] as? NSMutableArray
+    var notifications = self.notifications[name]
     if let notifications = notifications {
       if sender != nil {
-        for notification in notifications {
-          let not:Notification = notification as! Notification<T>
+        for not in notifications {
           if not.sender == nil {
             not.sender = sender
             didPublish = not.publishUserInfo(userInfo)
@@ -113,8 +112,7 @@ public class NotificationHub<T>  {
         }
       }
       else {
-        for notification in notifications {
-          let not:Notification = notification as! Notification<T>
+        for not in notifications {
           if not.sender == nil { didPublish = not.publishUserInfo(userInfo) }
         }
       }
@@ -143,12 +141,17 @@ public class NotificationHub<T>  {
     if notification.hub !== self { return false }
     
     let name = notification.name
-    var notifications = self.internalNotifications[name] as? NSMutableArray
+    var notifications = self.notifications[name]
+
+    if var notifications = notifications, let index = find(notifications, notification) {
+          notifications.removeAtIndex(index)
+    }
+
+
+
     
-    notifications?.removeObject(notification)
-    
-    
-    if notifications?.count == 0  { self.internalNotifications.removeObjectForKey(name) }
+    if notifications?.count == 0  { self.notifications.removeValueForKey(name) }
+    else                          { self.notifications[name] = notifications!  }
     notification.hub = nil
     
     return true
@@ -160,21 +163,23 @@ public class NotificationHub<T>  {
       NotificationHubMock.onRemoveMockHandler?(name:name, sender:sender)
     #endif
     
-    var notifications = self.internalNotifications[name] as? NSMutableArray
+    var notifications = self.notifications[name]
     let preCount = notifications?.count
     
-    if let notifications = notifications {
-      for notification in notifications {
-        let not:Notification = notification as! Notification<T>
+    if var notifications = notifications {
+      for not in notifications {
         if not.sender == nil || not.sender === sender {
-          notifications.removeObject(not)
+          if let index = find(notifications, not) {
+          notifications.removeAtIndex(index)
           not.hub = nil
+          }
         }
       }
     }
     
     let postCount = notifications?.count
-    if postCount == 0 {self.internalNotifications.removeObjectForKey(name) }
+    if postCount == 0 { self.notifications.removeValueForKey(name) }
+    else              { self.notifications[name] = notifications!  }
     
     
     return preCount != postCount
@@ -186,17 +191,17 @@ public class NotificationHub<T>  {
       NotificationHubMock.onRemoveMockHandler?(name:name, sender:nil)
     #endif
     
-    let preCount = self.internalNotifications.count
-    let notifications: NSArray? = self.internalNotifications[name] as? NSMutableArray
-    self.internalNotifications.removeObjectForKey(name)
+    let preCount = self.notifications.count
+    let notifications = self.notifications[name]
+    self.notifications.removeValueForKey(name)
     
     if let notifications = notifications {
-      for notification in notifications {
-        (notification as! Notification<T>).hub = nil
+      for not in notifications {
+        not.hub = nil
       }
     }
     
-    let postCount = self.internalNotifications.count
+    let postCount = self.notifications.count
     return preCount != postCount
   }
   
@@ -205,17 +210,17 @@ public class NotificationHub<T>  {
       NotificationHubMock.onRemoveMockHandler?(name:nil, sender:sender)
     #endif
     
-    var count = self.internalNotifications.count
-    let notifications = self.internalNotifications.allValues as? [[Notification<T>]]
+    var count = self.notifications.count
+    let notifications = self.notifications.values.array
     
-    if let notifications = notifications {
+
       for notificationList in notifications {
         for notification in notificationList {
           if notification.sender === sender { notification.remove() }
         }
       }
-    }
-    self.internalNotifications.removeAllObjects()
+
+    self.notifications.removeAll(keepCapacity: false)
     return count > 0
   }
   
@@ -226,26 +231,37 @@ public class NotificationHub<T>  {
       NotificationHubMock.onRemoveMockHandler?(name:nil, sender:nil)
     #endif
     
-    var count = self.internalNotifications.count
-    let notifications = self.internalNotifications.allValues as? [[Notification<T>]]
+    var count = self.notifications.count
+    let notifications = self.notifications.values
     
-    self.internalNotifications.removeAllObjects()
-    if let notifications = notifications {
+    self.notifications.removeAll(keepCapacity: false)
+
       for notificationList in notifications {
         for notification in notificationList { notification.hub = nil }
       }
-    }
-    self.internalNotifications.removeAllObjects()
+
     return count > 0
   }
 }
 
 
-extension Notification : Equatable {}
+extension Notification : Hashable {
+  public var hashValue: Int {
+    return ObjectIdentifier(self).hashValue
+  }
+
+}
 public func ==<T>(lhs: Notification<T>, rhs: Notification<T>) -> Bool { return lhs === rhs }
 
-extension NotificationHub : Equatable {}
+extension NotificationHub : Hashable {
+  public var hashValue: Int {
+    return ObjectIdentifier(self).hashValue
+  }
+
+}
 public func ==<T>(lhs: NotificationHub<T>, rhs: NotificationHub<T>) -> Bool { return lhs === rhs }
+
+
 
 
 #if DEBUG
