@@ -44,15 +44,15 @@ private struct Static {
 }
 
 
-var NotificationHubDefault : NotificationHub<[String:Any]> {
-get { return NotificationHub<[String:Any]>.defaultHub }
-}
+//public var NotificationHubDefault : NotificationHub<[String:Any]> {
+//  return NotificationHub<[String:Any]>()
+//}
 
 
 public class NotificationHub<T>  {
   final private var internalNotifications    =  NSMutableDictionary(capacity: 1000)
   final var notifications:[String: [Notification<T>]] {
-    return self.internalNotifications as AnyObject as [String: [Notification<T>]]
+    return self.internalNotifications as AnyObject as! [String: [Notification<T>]]
   }
   
   private class var defaultHub:NotificationHub<[String:Any]> {
@@ -79,7 +79,7 @@ public class NotificationHub<T>  {
     notification.hub = self
     
     let name = notification.name
-    if let notifications: NSMutableArray = self.internalNotifications[notification.name] as NSMutableArray? {
+    if let notifications: NSMutableArray = self.internalNotifications[notification.name] as! NSMutableArray? {
       notifications.addObject(notification)
     }
     else {
@@ -103,7 +103,7 @@ public class NotificationHub<T>  {
     if let notifications = notifications {
       if sender != nil {
         for notification in notifications {
-          let not:Notification = notification as Notification<T>
+          let not:Notification = notification as! Notification<T>
           if not.sender == nil {
             not.sender = sender
             didPublish = not.publishUserInfo(userInfo)
@@ -114,7 +114,7 @@ public class NotificationHub<T>  {
       }
       else {
         for notification in notifications {
-          let not:Notification = notification as Notification<T>
+          let not:Notification = notification as! Notification<T>
           if not.sender == nil { didPublish = not.publishUserInfo(userInfo) }
         }
       }
@@ -165,7 +165,7 @@ public class NotificationHub<T>  {
     
     if let notifications = notifications {
       for notification in notifications {
-        let not:Notification = notification as Notification<T>
+        let not:Notification = notification as! Notification<T>
         if not.sender == nil || not.sender === sender {
           notifications.removeObject(not)
           not.hub = nil
@@ -192,7 +192,7 @@ public class NotificationHub<T>  {
     
     if let notifications = notifications {
       for notification in notifications {
-        (notification as Notification<T>).hub = nil
+        (notification as! Notification<T>).hub = nil
       }
     }
     

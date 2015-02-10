@@ -44,7 +44,7 @@ class NotificationTests: XCTestCase {
       
     }
     XCTAssertNotNil(notification.sender)
-    let test = notification.sender as NotificationTests
+    let test = notification.sender as! NotificationTests
     XCTAssertEqual(test, self)
   }
   
@@ -59,7 +59,7 @@ class NotificationTests: XCTestCase {
   func testPublishUserInfo() {
     let expectation = self.expectationWithDescription(self.notificationName)
     var notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { not in
-      let value = not.userInfo!["key"] as Int
+      let value = not.userInfo!["key"] as! Int
       XCTAssertEqual(value, 5)
       XCTAssertNotNil(value)
       expectation.fulfill()
@@ -69,7 +69,7 @@ class NotificationTests: XCTestCase {
     let didPublish = notification.publishUserInfo(["key" : 5])
     XCTAssertTrue(didPublish)
     
-    self.waitForExpectationsWithTimeout(1, nil)
+    self.waitForExpectationsWithTimeout(1, handler: nil)
     XCTAssertTrue(notification.userInfo == nil)
   }
   
@@ -82,7 +82,7 @@ class NotificationTests: XCTestCase {
         isRemoved = false
     }
 
-    XCTAssertEqual(notification.sender as NotificationTests, self)
+    XCTAssertEqual(notification.sender as! NotificationTests, self)
     
     let didRemove      = notification.remove()
     let didPublish     = notification.publishUserInfo(nil)
@@ -95,7 +95,7 @@ class NotificationTests: XCTestCase {
     XCTAssertFalse(didRemoveAgain)
     
     if(isRemoved) { expectation.fulfill() }
-    self.waitForExpectationsWithTimeout(1, nil)
+    self.waitForExpectationsWithTimeout(1, handler: nil)
     
     
   }

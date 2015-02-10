@@ -14,7 +14,7 @@ class PerformanceTests: XCTestCase {
   var hub = NotificationHub<[String:String]>()
   var center = NSNotificationCenter()
   let limit = 1000
-  let recursiveLimit = 50 //30*30 = 900
+  let recursiveLimit = 100 //30*30 = 900
   
   override func setUp() {
     super.setUp()
@@ -26,6 +26,9 @@ class PerformanceTests: XCTestCase {
   /**************************************************************************
   SUBSCRIBE
   ***************************************************************************/
+  
+  
+  
   func testSubscribe() {
     self.measureBlock() { for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
       self.hub.subscribeNotificationForName(String(j), sender: nil) { not in}
