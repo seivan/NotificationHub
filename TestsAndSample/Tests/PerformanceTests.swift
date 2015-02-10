@@ -23,6 +23,7 @@ class PerformanceTests: XCTestCase {
     self.center = NSNotificationCenter()
 
   }
+  
   /**************************************************************************
   SUBSCRIBE
   ***************************************************************************/
@@ -37,6 +38,11 @@ class PerformanceTests: XCTestCase {
       for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
         self.center.addObserverForName(String(j), object: nil, queue: nil) { not in }
         }}; return }}
+  
+  
+  
+  
+  
   /**************************************************************************
   PUBLISH
   ***************************************************************************/
@@ -62,6 +68,12 @@ class PerformanceTests: XCTestCase {
         self.center.postNotificationName(String(i), object: nil, userInfo:nil)
       }; return }
   }
+  
+  
+  
+  
+  
+  
   /**************************************************************************
   REMOVE
   ***************************************************************************/
@@ -120,7 +132,6 @@ class PerformanceTests: XCTestCase {
       return
     }
   }
-
   
   func testAppleRemove() {
     var observers = [NSObjectProtocol]()

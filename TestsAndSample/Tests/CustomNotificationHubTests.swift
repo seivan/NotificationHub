@@ -24,9 +24,9 @@ class CustomNotificationHubTests: XCTestCase {
     XCTAssertNotNil(hub)
   }
 
-  func subscribe(notificationName:String = "notificationName", sender:AnyObject? = nil, block:(@autoclosure () -> ())? = nil) -> Notification<(string: String, int: Int)>  {
+  func subscribe(notificationName:String = "notificationName", sender:AnyObject? = nil, block:(() -> ())? = nil) -> Notification<(string: String, int: Int)>  {
     return self.hub.subscribeNotificationForName(notificationName, sender: sender) { not in
-      if(block != nil) { block!() }
+      if(block != nil){ block?() }
     }
   }
   
@@ -46,7 +46,7 @@ class CustomNotificationHubTests: XCTestCase {
       expectation.fulfill()
     }
     let didPublish = self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: (string: "LOL", int:5))
-    self.waitForExpectationsWithTimeout(1.0, nil)
+    self.waitForExpectationsWithTimeout(1.0, handler: nil)
     XCTAssertTrue(notification.userInfo == nil)
     XCTAssertTrue(didPublish)
   }
@@ -62,7 +62,7 @@ class CustomNotificationHubTests: XCTestCase {
     }
     
     self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
-    self.waitForExpectationsWithTimeout(1.0, nil)
+    self.waitForExpectationsWithTimeout(1.0, handler: nil)
 
   }
 
@@ -95,8 +95,8 @@ class CustomNotificationHubTests: XCTestCase {
   func subscribeAndResetCounter() {
     self.counter = 0
     for i in 0..<100 {
-      self.subscribe(notificationName: String(i), block:self.counter += 1 )
-      self.subscribe(notificationName: String(i), sender:self, block: self.counter += 1 )
+      self.subscribe(notificationName: String(i)) {self.counter += 1}
+      self.subscribe(notificationName: String(i), sender:self) {self.counter += 1}
     }
 
   }

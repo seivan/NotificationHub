@@ -8,6 +8,7 @@
 
 import XCTest
 
+var NotificationHubDefault = NotificationHub<[String:Any]>()
 class MockingTests: XCTestCase {
 
   var hub = NotificationHub<String>()
@@ -65,7 +66,7 @@ class MockingTests: XCTestCase {
     XCTAssertNil(mocks.last!.1)
     
     print(mocks.last)
-    XCTAssertEqual((mocks.last!.2 as String), second.name)
+    XCTAssertEqual((mocks.last!.2 as! String), second.name)
 
   }
   
