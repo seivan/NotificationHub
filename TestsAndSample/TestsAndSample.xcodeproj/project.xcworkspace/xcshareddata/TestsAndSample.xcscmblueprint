@@ -1,0 +1,35 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "7D887212F7F2DC6B33722FF599E54D6F40E43439+++F8FC78F",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "385E476955E4CA7E59E842478FBE8A019B31218E+++4485CC2" : 0,
+    "7D887212F7F2DC6B33722FF599E54D6F40E43439+++F8FC78F" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "DDAF91CE-6E2E-4223-99D8-3E9C1FDEC464",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "385E476955E4CA7E59E842478FBE8A019B31218E+++4485CC2" : "VectorArithmetic",
+    "7D887212F7F2DC6B33722FF599E54D6F40E43439+++F8FC78F" : "NotificationHub"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "TestsAndSample",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "TestsAndSample\/TestsAndSample.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "ssh:\/\/github.com\/seivan\/VectorArithmetic.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "385E476955E4CA7E59E842478FBE8A019B31218E+++4485CC2"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "ssh:\/\/github.com\/seivan\/VectorArithmetic.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "385E476955E4CA7E59E842478FBE8A019B31218E+++4485CC2"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:seivan\/NotificationHub.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "7D887212F7F2DC6B33722FF599E54D6F40E43439+++F8FC78F"
+    }
+  ]
+}

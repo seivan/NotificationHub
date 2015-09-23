@@ -24,10 +24,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 //      println(n.object)
 //    }
 
-    var w = NSNotification(name: "x", object: self, userInfo: nil)
-    var p = NSNotificationCenter.defaultCenter().addObserverForName("x", object: self, queue: nil) { n in
-      println("WITH NIL");
-      println(n.object)
+    let w = NSNotification(name: "x", object: self, userInfo: nil)
+    NSNotificationCenter.defaultCenter().addObserverForName("x", object: self, queue: nil) { n in
+      print("WITH NIL");
+      print(n.object)
     }
 //    var q = NSNotification(name: "x", object: nil, userInfo: nil)
 

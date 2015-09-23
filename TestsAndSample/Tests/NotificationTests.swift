@@ -40,7 +40,7 @@ class NotificationTests: XCTestCase {
   }
 
   func testSender() {
-    var notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { not in
+    let notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { not in
       
     }
     XCTAssertNotNil(notification.sender)
@@ -49,7 +49,7 @@ class NotificationTests: XCTestCase {
   }
   
   func testUserInfo() {
-    var notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { not in
+    let notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { not in
       
     }
     XCTAssertTrue(notification.userInfo == nil)
@@ -58,7 +58,7 @@ class NotificationTests: XCTestCase {
 
   func testPublishUserInfo() {
     let expectation = self.expectationWithDescription(self.notificationName)
-    var notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { not in
+    let notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { not in
       let value = not.userInfo!["key"] as! Int
       XCTAssertEqual(value, 5)
       XCTAssertNotNil(value)
@@ -78,11 +78,11 @@ class NotificationTests: XCTestCase {
     let expectation = self.expectationWithDescription(self.notificationName)
     var isRemoved = true
 
-    var notification = hub.subscribeNotificationForName(self.notificationName, sender: self) { not in
+    let notification = hub.subscribeNotificationForName(self.notificationName, sender: self) { not in
         isRemoved = false
     }
 
-    XCTAssertEqual(notification.sender as! NotificationTests, self)
+    XCTAssertEqual(notification.sender as? NotificationTests, self)
     
     let didRemove      = notification.remove()
     let didPublish     = notification.publishUserInfo(nil)

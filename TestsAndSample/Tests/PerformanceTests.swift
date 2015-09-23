@@ -28,14 +28,14 @@ class PerformanceTests: XCTestCase {
   SUBSCRIBE
   ***************************************************************************/
   func testSubscribe() {
-    self.measureBlock() { for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+    self.measureBlock() { for _ in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
       self.hub.subscribeNotificationForName(String(j), sender: nil) { not in}
       }}; return }}
   
   
   func testAppleSubscribe() {
     self.measureBlock() {
-      for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+      for _ in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
         self.center.addObserverForName(String(j), object: nil, queue: nil) { not in }
         }}; return }}
   
@@ -47,7 +47,7 @@ class PerformanceTests: XCTestCase {
   PUBLISH
   ***************************************************************************/
   func testPublish() {
-    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+    for _ in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
         self.hub.subscribeNotificationForName(String(j), sender: nil) { not in}
       }}
     
@@ -59,7 +59,7 @@ class PerformanceTests: XCTestCase {
 
 
   func testApplePublish() {
-    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+    for _ in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
         self.center.addObserverForName(String(j), object: nil, queue: nil) { not in }
       }}
     
@@ -79,7 +79,7 @@ class PerformanceTests: XCTestCase {
   ***************************************************************************/
   func testRemoveNotifications() {
     var observers = [Notification<[String : String]>]()
-    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+    for _ in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
       observers.append(self.hub.subscribeNotificationForName(String(j), sender: nil) { not in})
       }}
     
@@ -90,7 +90,7 @@ class PerformanceTests: XCTestCase {
   }
 
   func testRemoveNotificationWithName() {
-    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+    for _ in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
       self.hub.subscribeNotificationForName(String(j), sender: nil) { not in}
       }}
     
@@ -101,7 +101,7 @@ class PerformanceTests: XCTestCase {
   }
 
   func testRemoveNotificationWithNameSender() {
-    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+    for _ in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
       self.hub.subscribeNotificationForName(String(j), sender: nil) { not in}
       }}
     
@@ -112,7 +112,7 @@ class PerformanceTests: XCTestCase {
   }
 
   func testRemoveAllSender() {
-    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+    for _ in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
       self.hub.subscribeNotificationForName(String(j), sender: self) { not in}
       }}
     
@@ -123,7 +123,7 @@ class PerformanceTests: XCTestCase {
   }
   
   func testRemoveAll() {
-    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+    for _ in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
       self.hub.subscribeNotificationForName(String(j), sender: self) { not in}
       }}
     
@@ -135,7 +135,7 @@ class PerformanceTests: XCTestCase {
   
   func testAppleRemove() {
     var observers = [NSObjectProtocol]()
-    for i in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
+    for _ in 0...self.recursiveLimit { for j in 0...self.recursiveLimit {
       observers.append(self.center.addObserverForName(String(j), object: nil, queue: nil) { not in })
       }}
     

@@ -83,7 +83,7 @@ public class NotificationHub<T>  {
       notifications.addObject(notification)
     }
     else {
-      var array = NSMutableArray(capacity: 50)
+      let array = NSMutableArray(capacity: 50)
       array.addObject(notification)
       self.internalNotifications[name] = array
     }
@@ -142,7 +142,7 @@ public class NotificationHub<T>  {
     if notification.hub !== self { return false }
     
     let name = notification.name
-    var notifications = self.internalNotifications[name] as? NSMutableArray
+    let notifications = self.internalNotifications[name] as? NSMutableArray
     
     notifications?.removeObject(notification)
     
@@ -159,7 +159,7 @@ public class NotificationHub<T>  {
       NotificationHubMock.onRemoveMockHandler?(name:name, sender:sender)
     #endif
     
-    var notifications = self.internalNotifications[name] as? NSMutableArray
+    let notifications = self.internalNotifications[name] as? NSMutableArray
     let preCount = notifications?.count
     
     if let notifications = notifications {
@@ -204,7 +204,7 @@ public class NotificationHub<T>  {
       NotificationHubMock.onRemoveMockHandler?(name:nil, sender:sender)
     #endif
     
-    var count = self.internalNotifications.count
+    let count = self.internalNotifications.count
     let notifications = self.internalNotifications.allValues as? [[Notification<T>]]
     
     if let notifications = notifications {
@@ -225,7 +225,7 @@ public class NotificationHub<T>  {
       NotificationHubMock.onRemoveMockHandler?(name:nil, sender:nil)
     #endif
     
-    var count = self.internalNotifications.count
+    let count = self.internalNotifications.count
     let notifications = self.internalNotifications.allValues as? [[Notification<T>]]
     
     self.internalNotifications.removeAllObjects()

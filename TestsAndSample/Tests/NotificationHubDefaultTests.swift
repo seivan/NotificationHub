@@ -31,7 +31,7 @@ class NotificationHubDefaultTests: XCTestCase {
   }
   
   func testCreateNotificationHub() {
-    var hub = NotificationHub<[String:String]>()
+    let hub = NotificationHub<[String:String]>()
     XCTAssertFalse(NotificationHubDefault === hub)
     XCTAssertNotNil(hub)
   }
@@ -106,7 +106,7 @@ class NotificationHubDefaultTests: XCTestCase {
 
   
   func testSubscribeWithoutSender() {
-    var notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
+    let notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: nil) { notification in
     }
     XCTAssertNotNil(notification)
     XCTAssertEqual(self.notificationName, notification.name)
@@ -141,7 +141,7 @@ class NotificationHubDefaultTests: XCTestCase {
       XCTAssertNotNil(notification)
       XCTAssertEqual(self.notificationName, notification.name)
       XCTAssertNotNil(notification.sender)
-      XCTAssertEqual(self, notification.sender! as! NotificationHubDefaultTests)
+      XCTAssertEqual(self, notification.sender! as? NotificationHubDefaultTests)
       XCTAssertTrue(notification.userInfo == nil)
       expectation.fulfill()
     }
@@ -272,7 +272,7 @@ class NotificationHubDefaultTests: XCTestCase {
     let notifications = NotificationHubDefault.notifications[self.notificationName]!
     let didRemove = NotificationHubDefault.removeNotificationsName(self.notificationName, sender: nil)
     for notification in notifications {
-      var didPublish = NotificationHubDefault.publishNotification(notification)
+      let didPublish = NotificationHubDefault.publishNotification(notification)
       XCTAssertFalse(didPublish)
     }
     
@@ -298,7 +298,7 @@ class NotificationHubDefaultTests: XCTestCase {
     let notifications = NotificationHubDefault.notifications[self.notificationName]!
     let didRemove = NotificationHubDefault.removeNotificationsName(self.notificationName, sender: self)
     for notification in notifications {
-      var didPublish = NotificationHubDefault.publishNotification(notification)
+      let didPublish = NotificationHubDefault.publishNotification(notification)
       XCTAssertFalse(didPublish)
     }
 
@@ -322,7 +322,7 @@ class NotificationHubDefaultTests: XCTestCase {
     let notifications = NotificationHubDefault.notifications[self.notificationName]!
     let didRemove  = NotificationHubDefault.removeNotificationsName(self.notificationName, sender: nil)
     for notification in notifications {
-      var didPublish = NotificationHubDefault.publishNotification(notification)
+      let didPublish = NotificationHubDefault.publishNotification(notification)
       XCTAssertTrue(didPublish)
     }
 
@@ -346,7 +346,7 @@ class NotificationHubDefaultTests: XCTestCase {
     let notifications = NotificationHubDefault.notifications[self.notificationName]!
     let didRemove  = NotificationHubDefault.removeNotificationsName(self.notificationName, sender: self)
     for notification in notifications {
-      var didPublish = NotificationHubDefault.publishNotification(notification)
+      let didPublish = NotificationHubDefault.publishNotification(notification)
       XCTAssertFalse(didPublish)
     }
 
@@ -379,7 +379,7 @@ class NotificationHubDefaultTests: XCTestCase {
     notifications.append(NotificationHubDefault.notifications["Fuck"]!.first!)
     let didRemove  = NotificationHubDefault.removeAllNotificationsSender(self)
     for notification in notifications {
-      var didPublish = NotificationHubDefault.publishNotification(notification)
+      let didPublish = NotificationHubDefault.publishNotification(notification)
       XCTAssertFalse(didPublish)
     }
     
@@ -409,7 +409,7 @@ class NotificationHubDefaultTests: XCTestCase {
     let didPublishWithOutSelf = NotificationHubDefault.publishNotificationName(self.notificationName, sender: nil, userInfo: nil)
     
     for notification in notifications {
-      var didPublish = NotificationHubDefault.publishNotification(notification)
+      let didPublish = NotificationHubDefault.publishNotification(notification)
       XCTAssertFalse(didPublish)
     }
 
@@ -448,7 +448,7 @@ class NotificationHubDefaultTests: XCTestCase {
     let didPublishDifferentName = NotificationHubDefault.publishNotificationName("Testing something", sender: nil, userInfo: nil)
     
     for notification in notifications {
-      var didPublish = NotificationHubDefault.publishNotification(notification)
+      let didPublish = NotificationHubDefault.publishNotification(notification)
       XCTAssertFalse(didPublish)
     }
 
