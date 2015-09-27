@@ -92,7 +92,7 @@ class CustomNotificationHubTests: XCTestCase {
     XCTAssertFalse(didPublish)
   }
   
-  func subscribeAndResetCounter() {
+  func subscribeAndSetCounter() {
     self.counter = 0
     for i in 0..<100 {
       self.subscribe(String(i)) {self.counter += 1}
@@ -102,19 +102,19 @@ class CustomNotificationHubTests: XCTestCase {
   }
   
   func testPublishSeveralNotificationsWithoutSender() {
-    self.subscribeAndResetCounter()
+    self.subscribeAndSetCounter()
     for i in 0..<100 { self.publish(String(i)) }
     XCTAssertEqual(self.counter, 100)
   }
   
   func testPublishSeveralNotificationsWithSender() {
-    self.subscribeAndResetCounter()
+    self.subscribeAndSetCounter()
     for i in 0..<100 { self.publish(String(i), sender:self) }
     XCTAssertEqual(self.counter, 200)
   }
 
   func testRemoveNotifications() {
-    self.subscribeAndResetCounter()
+    self.subscribeAndSetCounter()
     var didPublishFlags = [Bool]()
     for i in 0..<100 { self.hub.removeNotificationsName(String(i), sender: nil) }
     for i in 0..<100 { didPublishFlags.append(self.publish(String(i), sender:self)) }
@@ -125,7 +125,7 @@ class CustomNotificationHubTests: XCTestCase {
   }
 
   func testRemoveNotificationsSender() {
-    self.subscribeAndResetCounter()
+    self.subscribeAndSetCounter()
     var didPublishFlags = [Bool]()
     for i in 0..<100 { self.hub.removeNotificationsName(String(i), sender: self) }
     for i in 0..<100 { didPublishFlags.append(self.publish(String(i), sender:self)) }
@@ -135,14 +135,14 @@ class CustomNotificationHubTests: XCTestCase {
   }
   
   func testGetNotifications() {
-    self.subscribeAndResetCounter()
+    self.subscribeAndSetCounter()
     XCTAssertEqual(self.hub.notifications.count, 100)
     for i in 0..<100 { XCTAssertTrue(self.hub.notifications[String(i)]?.count == 2) }
     
   }
   
   func testRemoveWithSender() {
-    self.subscribeAndResetCounter()
+    self.subscribeAndSetCounter()
     self.hub.removeAllNotificationsSender(self)
     
   }
