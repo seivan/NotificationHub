@@ -165,7 +165,7 @@ public class NotificationHub<T>  {
         let preCount = notifications.count
         
 
-        var filteredNotifications = notifications.filter { not -> Bool in
+        let filteredNotifications = notifications.filter { not -> Bool in
             guard not.sender == nil || not.sender === sender else { return true  }
             not.hub = nil
             return false
