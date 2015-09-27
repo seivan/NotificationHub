@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2200AAB71BB8A008007F9D62 /* NotificationHubExperiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2200AAB61BB8A008007F9D62 /* NotificationHubExperiment.swift */; settings = {ASSET_TAGS = (); }; };
+		2200AAB81BB8A008007F9D62 /* NotificationHubExperiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2200AAB61BB8A008007F9D62 /* NotificationHubExperiment.swift */; settings = {ASSET_TAGS = (); }; };
 		220262071A2A37C000181E53 /* MockingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220262061A2A37C000181E53 /* MockingTests.swift */; };
 		220A8EEA1A0726C8006D1D83 /* CustomNotificationHubTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220A8EE91A0726C8006D1D83 /* CustomNotificationHubTests.swift */; };
 		220A8EEC1A0726D9006D1D83 /* NotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220A8EEB1A0726D9006D1D83 /* NotificationTests.swift */; };
@@ -30,6 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2200AAB61BB8A008007F9D62 /* NotificationHubExperiment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationHubExperiment.swift; sourceTree = "<group>"; };
 		220262061A2A37C000181E53 /* MockingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockingTests.swift; sourceTree = "<group>"; };
 		220A8EE91A0726C8006D1D83 /* CustomNotificationHubTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomNotificationHubTests.swift; sourceTree = "<group>"; };
 		220A8EEB1A0726D9006D1D83 /* NotificationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTests.swift; sourceTree = "<group>"; };
@@ -67,6 +70,7 @@
 			isa = PBXGroup;
 			children = (
 				225F742619D8BEDF007F31C5 /* NotificationHub.swift */,
+				2200AAB61BB8A008007F9D62 /* NotificationHubExperiment.swift */,
 			);
 			name = NotificationHub;
 			path = ../NotificationHub;
@@ -167,7 +171,9 @@
 		22AFC471195F9D02003572F3 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0610;
+				LastSwiftMigration = 0700;
+				LastSwiftUpdateCheck = 0700;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Seivan Heidari";
 				TargetAttributes = {
 					22B1758B1A06BD35004904C5 = {
@@ -223,6 +229,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				22B175B61A06BEB3004904C5 /* NotificationHub.swift in Sources */,
+				2200AAB71BB8A008007F9D62 /* NotificationHubExperiment.swift in Sources */,
 				22B175911A06BD35004904C5 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -231,6 +238,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2200AAB81BB8A008007F9D62 /* NotificationHubExperiment.swift in Sources */,
 				220262071A2A37C000181E53 /* MockingTests.swift in Sources */,
 				220A8EEC1A0726D9006D1D83 /* NotificationTests.swift in Sources */,
 				22B175B31A06BDBA004904C5 /* PerformanceTests.swift in Sources */,
@@ -282,6 +290,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -355,6 +364,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "seivanheidari.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 			};
@@ -371,6 +381,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "seivanheidari.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 			};
@@ -395,6 +406,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				OTHER_SWIFT_FLAGS = "-D DEBUG";
+				PRODUCT_BUNDLE_IDENTIFIER = "seivanheidari.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -417,9 +429,11 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_SWIFT_FLAGS = "-D DEBUG";
+				PRODUCT_BUNDLE_IDENTIFIER = "seivanheidari.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SWIFT_OPTIMIZATION_LEVEL = "-Ounchecked";
+				SWIFT_DISABLE_SAFETY_CHECKS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
 		};

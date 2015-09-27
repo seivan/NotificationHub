@@ -65,7 +65,7 @@ class MockingTests: XCTestCase {
     XCTAssertTrue(mocks.last!.1 === second.sender)
     XCTAssertNil(mocks.last!.1)
     
-    print(mocks.last)
+    print(mocks.last, terminator: "")
     XCTAssertEqual((mocks.last!.2 as! String), second.name)
 
   }
@@ -137,8 +137,8 @@ class MockingTests: XCTestCase {
      mocks.append((name, sender))
     }
 
-    let first = NotificationHubDefault.subscribeNotificationForName("A name", sender: self) { n in }
-    let second = self.hub.subscribeNotificationForName("the second name", sender: nil) { n in }
+    NotificationHubDefault.subscribeNotificationForName("A name", sender: self) { n in }
+    self.hub.subscribeNotificationForName("the second name", sender: nil) { n in }
     
     NotificationHubDefault.removeAllNotifications()
     XCTAssertEqual(mocks.count, 1)
