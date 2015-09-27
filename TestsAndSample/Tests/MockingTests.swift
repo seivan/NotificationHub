@@ -65,7 +65,7 @@ class MockingTests: XCTestCase {
     XCTAssertTrue(mocks.last!.1 === second.sender)
     XCTAssertNil(mocks.last!.1)
     
-    print(mocks.last, appendNewline: false)
+    print(mocks.last, terminator: "")
     XCTAssertEqual((mocks.last!.2 as! String), second.name)
 
   }
