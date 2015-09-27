@@ -39,14 +39,9 @@ public class Notification<T>  {
 
 
 private struct Static {
-    static var hubToken : dispatch_once_t = 0
-    static var hub : NotificationHub<[String:Any]>? = nil
+    static var hub = NotificationHub<[String:Any]>()
 }
 
-
-//public var NotificationHubDefault : NotificationHub<[String:Any]> {
-//  return NotificationHub<[String:Any]>()
-//}
 
 
 public class NotificationHub<T>  {
@@ -56,14 +51,9 @@ public class NotificationHub<T>  {
         return self.notifications.values.flatMap { return $0 }
     }
     
-    
-    private class var defaultHub:NotificationHub<[String:Any]> {
-        dispatch_once(&Static.hubToken) {
-            Static.hub = NotificationHub<[String:Any]>()
-        }
-        return Static.hub!
-    }
-    
+
+    class var defaultHub:NotificationHub<[String:Any]> { return Static.hub }
+
     init() {}
     
     
@@ -81,11 +71,12 @@ public class NotificationHub<T>  {
         notification.hub = self
         
         let name = notification.name
-        if var notifications = self.notifications[notification.name] {
+        if var notifications = self.notifications[name] {
             notifications.append(notification)
-            self.notifications[notification.name] =  notifications
+            self.notifications[name] =  notifications
         }
         else {
+
             self.notifications[name] = [notification]
         }
         
