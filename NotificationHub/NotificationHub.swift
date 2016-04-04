@@ -1,6 +1,7 @@
 import Foundation
+import simd
 
-public class Notification<T>  {
+final public class Notification<T>  {
   typealias NotificationClosure = (Notification<T>) -> Void
   let name:String
   private(set) weak var sender:AnyObject?
@@ -49,7 +50,7 @@ private struct Static {
 //}
 
 
-public class NotificationHub<T>  {
+final public class NotificationHub<T>  {
   final private var internalNotifications    =  NSMutableDictionary(capacity: 1000)
   final var notifications:[String: [Notification<T>]] {
     return self.internalNotifications as AnyObject as! [String: [Notification<T>]]
