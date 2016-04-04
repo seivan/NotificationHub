@@ -1,6 +1,6 @@
 import Foundation
 
-public class Notification<T>  {
+final public class Notification<T>  {
     typealias NotificationClosure = (Notification<T>) -> Void
     let name:String
     private(set) weak var sender:AnyObject?
@@ -44,7 +44,7 @@ private struct Static {
 
 
 
-public class NotificationHub<T>  {
+final public class NotificationHub<T>  {
     final private(set) var notifications    =  [String: [Notification<T>]]()
     
     final private var allNotifications:[Notification<T>] {
