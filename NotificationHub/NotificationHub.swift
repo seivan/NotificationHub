@@ -57,6 +57,7 @@ final public class NotificationHub<T>  {
     init() {}
     
     
+    
     func subscribeNotificationForName(name: String, sender: AnyObject? = nil, handler: (Notification<T>) -> Void) -> Notification<T> {
         let notification = Notification(name: name, sender: sender, handler: handler)
         return self.subscribeNotification(notification)
@@ -72,8 +73,11 @@ final public class NotificationHub<T>  {
         
         let name = notification.name
         if var notifications = self.notifications[name] {
-            notifications.append(notification)
-            self.notifications[name] =  notifications
+//            notifications.append(notification)
+//            self.notifications[name] =  notifications
+            self.notifications.updateValue(<#T##value: Value##Value#>, forKey: <#T##Hashable#>)
+            
+            
         }
         else {
 
