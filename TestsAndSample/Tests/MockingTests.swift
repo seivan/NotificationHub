@@ -116,8 +116,8 @@ class MockingTests: XCTestCase {
     let second = self.hub.subscribeNotificationForName("the second name", sender: nil) { n in }
     
     
-    NotificationHubDefault.removeAllNotificationsName(first.name)
-    self.hub.removeAllNotificationsName(second.name)
+    NotificationHubDefault.removeAllNotificationsName(name:first.name)
+    self.hub.removeAllNotificationsName(name:second.name)
     
     
     XCTAssertEqual(mocks.count, 2)

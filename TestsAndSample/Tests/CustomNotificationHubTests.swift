@@ -31,13 +31,13 @@ class CustomNotificationHubTests: XCTestCase {
   }
   
   func publish(notificationName:String = "notificationName", sender:AnyObject? = nil, userInfo:(string: String, int: Int)? = (string: "LOL", int:5) ) -> Bool {
-    let didPublish = self.hub.publishNotificationName(notificationName, sender: sender, userInfo: userInfo)
+    let didPublish = self.hub.publishNotificationName(name: notificationName, sender: sender, userInfo: userInfo)
     return didPublish
   }
   
   
   func testPublish() {
-    let expectation = self.expectationWithDescription(self.notificationName)
+    let expectation = self.expectation(description: self.notificationName)
     let notification = self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { not in
       let string = not.userInfo?.string as String?
       let int = not.userInfo?.int as Int?
@@ -45,15 +45,15 @@ class CustomNotificationHubTests: XCTestCase {
       XCTAssertEqual(int!, 5)
       expectation.fulfill()
     }
-    let didPublish = self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: (string: "LOL", int:5))
-    self.waitForExpectationsWithTimeout(1.0, handler: nil)
+    let didPublish = self.hub.publishNotificationName(name: self.notificationName, sender: self, userInfo: (string: "LOL", int:5))
+    self.waitForExpectations(timeout: 1.0, handler: nil)
     XCTAssertTrue(notification.userInfo == nil)
     XCTAssertTrue(didPublish)
   }
   
   func testSubscribe() {
-    let expectationOne = self.expectationWithDescription(self.notificationName)
-    let expectationTwo = self.expectationWithDescription(self.notificationName)
+    let expectationOne = self.expectation(description: self.notificationName)
+    let expectationTwo = self.expectation(description: self.notificationName)
     self.hub.subscribeNotificationForName(self.notificationName, sender: nil) { not in
      expectationOne.fulfill()
     }
@@ -61,8 +61,8 @@ class CustomNotificationHubTests: XCTestCase {
       expectationTwo.fulfill()
     }
     
-    self.hub.publishNotificationName(self.notificationName, sender: self, userInfo: nil)
-    self.waitForExpectationsWithTimeout(1.0, handler: nil)
+    self.hub.publishNotificationName(name: self.notificationName, sender: self, userInfo: nil)
+    self.waitForExpectations(timeout: 1.0, handler: nil)
 
   }
 
@@ -95,21 +95,21 @@ class CustomNotificationHubTests: XCTestCase {
   func subscribeAndResetCounter() {
     self.counter = 0
     for i in 0..<100 {
-      self.subscribe(String(i)) {self.counter += 1}
-      self.subscribe(String(i), sender:self) {self.counter += 1}
+      self.subscribe(notificationName: String(i)) {self.counter += 1}
+      self.subscribe(notificationName: String(i), sender:self) {self.counter += 1}
     }
 
   }
   
   func testPublishSeveralNotificationsWithoutSender() {
     self.subscribeAndResetCounter()
-    for i in 0..<100 { self.publish(String(i)) }
+    for i in 0..<100 { self.publish(notificationName: String(i)) }
     XCTAssertEqual(self.counter, 100)
   }
   
   func testPublishSeveralNotificationsWithSender() {
     self.subscribeAndResetCounter()
-    for i in 0..<100 { self.publish(String(i), sender:self) }
+    for i in 0..<100 { self.publish(notificationName:String(i), sender:self) }
     XCTAssertEqual(self.counter, 200)
   }
 
@@ -117,7 +117,7 @@ class CustomNotificationHubTests: XCTestCase {
     self.subscribeAndResetCounter()
     var didPublishFlags = [Bool]()
     for i in 0..<100 { self.hub.removeNotificationsName(String(i), sender: nil) }
-    for i in 0..<100 { didPublishFlags.append(self.publish(String(i), sender:self)) }
+    for i in 0..<100 { didPublishFlags.append(self.publish(notificationName: String(i), sender:self)) }
     didPublishFlags = didPublishFlags.filter() { flag in return flag == true }
     XCTAssertEqual(self.counter, 100)
     XCTAssertEqual(didPublishFlags.count, 100)
@@ -128,7 +128,7 @@ class CustomNotificationHubTests: XCTestCase {
     self.subscribeAndResetCounter()
     var didPublishFlags = [Bool]()
     for i in 0..<100 { self.hub.removeNotificationsName(String(i), sender: self) }
-    for i in 0..<100 { didPublishFlags.append(self.publish(String(i), sender:self)) }
+    for i in 0..<100 { didPublishFlags.append(self.publish(notificationName: String(i), sender:self)) }
     didPublishFlags = didPublishFlags.filter() { flag in return flag == true }
     XCTAssertEqual(self.counter, 0)
     XCTAssertEqual(didPublishFlags.count, 0)
@@ -143,7 +143,7 @@ class CustomNotificationHubTests: XCTestCase {
   
   func testRemoveWithSender() {
     self.subscribeAndResetCounter()
-    self.hub.removeAllNotificationsSender(self)
+    self.hub.removeAllNotificationsSender(sender: self)
     
   }
   

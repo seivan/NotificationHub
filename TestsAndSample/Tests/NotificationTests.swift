@@ -57,7 +57,7 @@ class NotificationTests: XCTestCase {
   }
 
   func testPublishUserInfo() {
-    let expectation = self.expectationWithDescription(self.notificationName)
+    let expectation = self.expectation(description: self.notificationName)
     let notification = NotificationHubDefault.subscribeNotificationForName(self.notificationName, sender: self) { not in
       let value = not.userInfo!["key"] as! Int
       XCTAssertEqual(value, 5)
@@ -69,13 +69,13 @@ class NotificationTests: XCTestCase {
     let didPublish = notification.publishUserInfo(["key" : 5])
     XCTAssertTrue(didPublish)
     
-    self.waitForExpectationsWithTimeout(1, handler: nil)
+    self.waitForExpectations(timeout:1, handler: nil)
     XCTAssertTrue(notification.userInfo == nil)
   }
   
   func testRemove() {
     let hub = NotificationHub<String>()
-    let expectation = self.expectationWithDescription(self.notificationName)
+    let expectation = self.expectation(description: self.notificationName)
     var isRemoved = true
 
     let notification = hub.subscribeNotificationForName(self.notificationName, sender: self) { not in
@@ -95,7 +95,7 @@ class NotificationTests: XCTestCase {
     XCTAssertFalse(didRemoveAgain)
     
     if(isRemoved) { expectation.fulfill() }
-    self.waitForExpectationsWithTimeout(1, handler: nil)
+    self.waitForExpectations(timeout: 1, handler: nil)
     
     
   }
